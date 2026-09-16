@@ -47,6 +47,18 @@ Para publicar una versión:
 Comprueba la sintaxis, lee la versión de la cabecera del plugin y deja en
 `dist/` el ZIP y el JSON que consultan las webs.
 
+Antes de publicar, pasa las pruebas del actualizador. No necesitan
+WordPress: corren contra un simulador que vive en `pruebas/`.
+
+```bash
+php pruebas/actualizador.php lamosquita-cookies
+```
+
+Cubren la comparación de versiones, la convivencia con otros plugins
+nuestros (el filtro es por anfitrión, así que a cada actualizador le
+llegan las consultas de los demás), qué pasa cuando el servidor falla o
+devuelve basura, y que la caché no machaque a un servidor caído.
+
 **La primera instalación siempre es manual:** WordPress lee `Update URI` del
 plugin ya instalado, así que una versión que no la lleve no se entera de
 nada.
