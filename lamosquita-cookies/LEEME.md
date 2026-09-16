@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.3.2 · 16/09/2026. Cambios en §11.
+Versión 0.4.0 · 16/09/2026. Cambios en §11.
 
 ---
 
@@ -27,6 +27,7 @@ Versión 0.3.2 · 16/09/2026. Cambios en §11.
 ```
 lamosquita-cookies/
   lamosquita-cookies.php   cabecera del plugin y bloque AJUSTES          (WordPress)
+  actualizador.php         avisos de versión nueva desde nuestro servidor (§3.1)
   nucleo/                  lo que no depende de WordPress
     lmc-cabecera.js        consentimiento de Google por defecto; va lo PRIMERO del <head>
     lmc.js                 aviso, panel, activación de lo bloqueado, señales, registro
@@ -63,6 +64,49 @@ lamosquita-cookies/
    - al rechazar, no carga nada.
 
 **Diagnóstico:** un administrador puede ver cualquier página sin el plugin añadiendo `?lmc-desactivar` a la URL.
+
+### 3.1 · Actualizaciones
+
+El plugin avisa de las versiones nuevas en **Escritorio › Actualizaciones**,
+como cualquier otro, pero contra nuestro servidor. No usa librerías de
+terceros: es el mecanismo que trae WordPress desde la 5.8, la cabecera
+`Update URI` más el filtro `update_plugins_<anfitrión>`.
+
+**La primera vez hay que subirlo a mano.** WordPress lee `Update URI` del
+plugin **instalado**; si la versión que hay puesta no la lleva, en
+`wp-includes/update.php` hace `continue` y no pregunta nada. Así que
+cualquier web con una versión anterior a la 0.4.0 necesita una subida
+manual, y a partir de ahí ya se actualiza sola.
+
+Para publicar una versión, desde la raíz del repositorio:
+
+```bash
+./empaquetar.sh lamosquita-cookies
+```
+
+Lee la versión de la cabecera —y falla si no coincide con `LMC_VERSION`—,
+comprueba la sintaxis de todos los `.php` y `.js`, y deja en `dist/` el ZIP
+y el JSON. Los dos se suben a `plugins.lamosquita.net`. El JSON conserva
+siempre el mismo nombre, porque es la dirección fija que consultan las
+webs; el ZIP lleva el número de versión, así que las versiones antiguas
+siguen ahí y se puede volver atrás.
+
+Cada web pregunta como mucho una vez cada 6 horas (`Lamosquita_Actualizador::CACHE`),
+y si el servidor no contesta se calla durante 30 minutos en vez de
+insistir en cada carga del escritorio. Que el servidor esté caído no rompe
+nada: sólo no hay aviso.
+
+**De paso, el recuento de instalaciones.** WordPress manda en cada petición
+un `User-Agent` con la dirección del sitio y su versión:
+
+```
+WordPress/7.1; https://ejemplo.com
+```
+
+Así que el log de Apache de `plugins.lamosquita.net` ya dice qué webs
+preguntan, con qué WordPress y cuándo, sin añadir telemetría. Si el plugin
+se instala fuera de casa, conviene decirlo en su página: la dirección del
+sitio queda registrada al comprobar actualizaciones.
 
 ---
 
@@ -241,6 +285,18 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.0** · 16/09/2026
+
+- **Actualizaciones desde el escritorio** (§3.1). Nuevo `actualizador.php`,
+  común a todos nuestros plugins, y cabecera `Update URI`. Sin librerías de
+  terceros.
+- **Ojo con la primera vez:** las instalaciones anteriores a esta versión no
+  se enteran solas, porque WordPress mira la cabecera del plugin ya
+  instalado. Hay que subir la 0.4.0 a mano una vez en cada web.
+- Nuevo `empaquetar.sh` en la raíz del repositorio: genera el ZIP y el JSON
+  leyendo la versión de la cabecera, y se niega a empaquetar si la cabecera
+  y `LMC_VERSION` no coinciden o si algún fichero no pasa el lint.
 
 **0.3.2** · 16/09/2026, al integrarlo en una web sin WordPress
 

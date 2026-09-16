@@ -31,6 +31,26 @@ Lo que vive en `nucleo/` puede usarse en una web en PHP plano copiando esa
 carpeta y escribiendo la configuración a mano. `lamosquita-cookies` está en
 producción de las dos maneras.
 
+## Actualizaciones
+
+Cada plugin lleva `actualizador.php`, que hace que las versiones nuevas
+aparezcan en **Escritorio › Actualizaciones** de cada web. Usa el mecanismo
+nativo de WordPress (cabecera `Update URI` y filtro
+`update_plugins_<anfitrión>`, desde la 5.8), sin librerías de terceros.
+
+Para publicar una versión:
+
+```bash
+./empaquetar.sh lamosquita-cookies
+```
+
+Comprueba la sintaxis, lee la versión de la cabecera del plugin y deja en
+`dist/` el ZIP y el JSON que consultan las webs.
+
+**La primera instalación siempre es manual:** WordPress lee `Update URI` del
+plugin ya instalado, así que una versión que no la lleve no se entera de
+nada.
+
 ## Instalar
 
 Copia la carpeta del plugin a `wp-content/plugins/` y actívalo desde el
