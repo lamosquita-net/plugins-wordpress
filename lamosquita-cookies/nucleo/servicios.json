@@ -1,0 +1,232 @@
+{
+  "lamosquita-cookies": {
+    "nombre": "Preferencias de cookies",
+    "proveedor": "Esta web",
+    "categoria": "necesarias",
+    "finalidad": "Recordar la elección sobre las cookies.",
+    "cookies": ["lmc_consentimiento"],
+    "duracion": "12 meses"
+  },
+  "wordpress": {
+    "nombre": "WordPress",
+    "proveedor": "Esta web",
+    "categoria": "necesarias",
+    "finalidad": "Sesión de quien inicia sesión y comprobación de cookies en el acceso.",
+    "cookies": ["wordpress_logged_in_*", "wordpress_sec_*", "wordpress_test_cookie", "wp-settings-*", "wp-settings-time-*"],
+    "duracion": "Sesión o 1 año"
+  },
+  "sesion-php": {
+    "nombre": "Sesión PHP",
+    "proveedor": "Esta web",
+    "categoria": "necesarias",
+    "finalidad": "Mantener la sesión del visitante entre páginas (acceso, carrito o formularios).",
+    "cookies": ["PHPSESSID"],
+    "duracion": "Sesión"
+  },
+  "wordfence": {
+    "nombre": "Wordfence",
+    "proveedor": "Esta web",
+    "categoria": "necesarias",
+    "finalidad": "Seguridad del acceso al escritorio.",
+    "cookies": ["wfwaf-authcookie-*", "wf_loginalerted_*", "wfls-remembered-*"],
+    "duracion": "Hasta 1 año"
+  },
+  "woocommerce": {
+    "nombre": "WooCommerce",
+    "proveedor": "Esta web",
+    "categoria": "necesarias",
+    "finalidad": "Carrito, sesión de compra y pago.",
+    "cookies": ["woocommerce_cart_hash", "woocommerce_items_in_cart", "wp_woocommerce_session_*", "woocommerce_recently_viewed"],
+    "duracion": "Sesión o 2 días",
+    "scripts": ["#/woocommerce/assets/js/frontend/(cart|checkout|add-to-cart)#i"]
+  },
+  "woocommerce-atribucion": {
+    "nombre": "WooCommerce · atribución de pedidos",
+    "proveedor": "Esta web",
+    "categoria": "estadistica",
+    "finalidad": "Saber de qué campaña o web llega cada pedido.",
+    "cookies": ["sbjs_*"],
+    "duracion": "Sesión o 6 meses",
+    "scripts": ["#/woocommerce/assets/js/(sourcebuster|frontend/order-attribution)#i", "#wc_order_attribution#i"]
+  },
+  "stripe": {
+    "nombre": "Stripe",
+    "proveedor": "Stripe Payments Europe Ltd.",
+    "categoria": "necesarias",
+    "finalidad": "Procesar pagos y prevenir el fraude.",
+    "cookies": ["__stripe_mid", "__stripe_sid"],
+    "duracion": "Hasta 1 año",
+    "scripts": ["#js\\.stripe\\.com#i"]
+  },
+  "recaptcha": {
+    "nombre": "Google reCAPTCHA",
+    "proveedor": "Google Ireland Ltd.",
+    "categoria": "necesarias",
+    "finalidad": "Proteger los formularios de envíos automáticos.",
+    "cookies": ["_GRECAPTCHA"],
+    "duracion": "6 meses",
+    "scripts": ["#(google|gstatic)\\.com/recaptcha/#i"]
+  },
+  "cdn-publicos": {
+    "nombre": "Librerías de CDN públicos",
+    "proveedor": "jQuery, cdnjs, jsDelivr, unpkg, Google Hosted Libraries",
+    "categoria": "necesarias",
+    "finalidad": "Cargar librerías de programación que usa la web. No crean cookies; el proveedor recibe la dirección IP al servirlas.",
+    "cookies": [],
+    "scripts": ["#//code\\.jquery\\.com/#i", "#//cdnjs\\.cloudflare\\.com/#i", "#//cdn\\.jsdelivr\\.net/#i", "#//unpkg\\.com/#i", "#//ajax\\.googleapis\\.com/ajax/libs/#i"]
+  },
+  "adobe-fonts": {
+    "nombre": "Adobe Fonts",
+    "proveedor": "Adobe Systems Software Ireland Ltd.",
+    "categoria": "necesarias",
+    "finalidad": "Tipografías de la web. No crea cookies.",
+    "cookies": [],
+    "scripts": ["#use\\.typekit\\.net#i"]
+  },
+  "google-analytics": {
+    "nombre": "Google Analytics",
+    "proveedor": "Google Ireland Ltd.",
+    "categoria": "estadistica",
+    "google": true,
+    "finalidad": "Medir de forma agregada cómo se usa la web.",
+    "cookies": ["_ga", "_ga_*", "_gid", "_gat*"],
+    "duracion": "Hasta 2 años",
+    "politica": "https://policies.google.com/privacy",
+    "scripts": [
+      "#googletagmanager\\.com/gtag/js\\?id=(G|UA)-#i",
+      "#google-analytics\\.com/(analytics|ga)\\.js#i",
+      "#gtag\\(\\s*['\"]config['\"]\\s*,\\s*['\"](G|UA)-#",
+      "#GoogleAnalyticsObject#"
+    ]
+  },
+  "google-tag-manager": {
+    "nombre": "Google Tag Manager",
+    "proveedor": "Google Ireland Ltd.",
+    "categoria": "estadistica",
+    "google": true,
+    "finalidad": "Cargar las etiquetas de medición configuradas. Las etiquetas respetan el consentimiento de cada categoría.",
+    "cookies": [],
+    "scripts": ["#googletagmanager\\.com/gtm\\.js#i"],
+    "iframes": ["#googletagmanager\\.com/ns\\.html#i"]
+  },
+  "google-ads": {
+    "nombre": "Google Ads",
+    "proveedor": "Google Ireland Ltd.",
+    "categoria": "marketing",
+    "google": true,
+    "finalidad": "Medir conversiones de campañas y personalizar anuncios.",
+    "cookies": ["_gcl_au", "_gcl_aw", "_gcl_dc"],
+    "duracion": "90 días",
+    "politica": "https://policies.google.com/privacy",
+    "scripts": [
+      "#googletagmanager\\.com/gtag/js\\?id=AW-#i",
+      "#gtag\\(\\s*['\"]config['\"]\\s*,\\s*['\"]AW-#",
+      "#googleadservices\\.com#i"
+    ]
+  },
+  "google-adsense": {
+    "nombre": "Google AdSense",
+    "proveedor": "Google Ireland Ltd.",
+    "categoria": "marketing",
+    "google": true,
+    "finalidad": "Mostrar publicidad.",
+    "cookies": ["__gads", "__gpi", "__eoi"],
+    "duracion": "Hasta 13 meses",
+    "scripts": ["#pagead2\\.googlesyndication\\.com#i", "#adsbygoogle#"]
+  },
+  "meta-pixel": {
+    "nombre": "Píxel de Meta",
+    "proveedor": "Meta Platforms Ireland Ltd.",
+    "categoria": "marketing",
+    "finalidad": "Medir campañas y mostrar anuncios en Facebook e Instagram.",
+    "cookies": ["_fbp", "_fbc"],
+    "duracion": "90 días",
+    "scripts": ["#connect\\.facebook\\.net/[^/]+/fbevents\\.js#i", "#fbq\\(\\s*['\"]init#"]
+  },
+  "tiktok-pixel": {
+    "nombre": "Píxel de TikTok",
+    "proveedor": "TikTok Technology Ltd.",
+    "categoria": "marketing",
+    "finalidad": "Medir campañas en TikTok.",
+    "cookies": ["_ttp", "_tt_enable_cookie"],
+    "duracion": "13 meses",
+    "scripts": ["#analytics\\.tiktok\\.com#i"]
+  },
+  "linkedin-insight": {
+    "nombre": "LinkedIn Insight Tag",
+    "proveedor": "LinkedIn Ireland Unlimited Company",
+    "categoria": "marketing",
+    "finalidad": "Medir campañas en LinkedIn.",
+    "cookies": ["li_fat_id", "lidc", "bcookie"],
+    "duracion": "Hasta 1 año",
+    "scripts": ["#snap\\.licdn\\.com#i"]
+  },
+  "pinterest-tag": {
+    "nombre": "Etiqueta de Pinterest",
+    "proveedor": "Pinterest Europe Ltd.",
+    "categoria": "marketing",
+    "finalidad": "Medir campañas en Pinterest.",
+    "cookies": ["_pin_unauth", "_pinterest_ct_ua", "_epik"],
+    "duracion": "Hasta 1 año",
+    "scripts": ["#s\\.pinimg\\.com/ct/core\\.js#i"]
+  },
+  "microsoft-clarity": {
+    "nombre": "Microsoft Clarity",
+    "proveedor": "Microsoft Ireland Operations Ltd.",
+    "categoria": "estadistica",
+    "finalidad": "Grabar de forma anónima cómo se navega por la web.",
+    "cookies": ["_clck", "_clsk"],
+    "duracion": "Hasta 1 año",
+    "scripts": ["#clarity\\.ms/tag/#i"]
+  },
+  "hotjar": {
+    "nombre": "Hotjar",
+    "proveedor": "Hotjar Ltd.",
+    "categoria": "estadistica",
+    "finalidad": "Mapas de calor y grabación anónima de la navegación.",
+    "cookies": ["_hj*"],
+    "duracion": "Hasta 1 año",
+    "scripts": ["#static\\.hotjar\\.com#i"]
+  },
+  "youtube": {
+    "nombre": "YouTube",
+    "proveedor": "Google Ireland Ltd.",
+    "categoria": "marketing",
+    "finalidad": "Reproducir vídeos incrustados. Crea cookies al reproducir, también desde youtube-nocookie.com.",
+    "recargar": true,
+    "cookies": ["VISITOR_INFO1_LIVE", "YSC"],
+    "duracion": "Sesión o 6 meses",
+    "scripts": ["#youtube\\.com/iframe_api#i"],
+    "iframes": ["#//(www\\.)?youtube(-nocookie)?\\.com/embed/#i"]
+  },
+  "vimeo": {
+    "nombre": "Vimeo",
+    "proveedor": "Vimeo.com, Inc.",
+    "categoria": "marketing",
+    "finalidad": "Reproducir vídeos incrustados y medir su uso.",
+    "cookies": ["vuid", "_cfuvid"],
+    "duracion": "Hasta 2 años",
+    "iframes": ["#//player\\.vimeo\\.com/video/(?!.*[?&]dnt=1)#i"]
+  },
+  "vimeo-dnt": {
+    "nombre": "Vimeo (reproductor sin seguimiento)",
+    "proveedor": "Vimeo.com, Inc.",
+    "categoria": "necesarias",
+    "finalidad": "Reproducir vídeos incrustados. Con el parámetro dnt=1 el reproductor no crea cookies de seguimiento.",
+    "cookies": [],
+    "scripts": ["#player\\.vimeo\\.com/api/player\\.js#i"],
+    "iframes": ["#//player\\.vimeo\\.com/video/.*[?&]dnt=1#i"]
+  },
+  "google-maps": {
+    "nombre": "Google Maps",
+    "proveedor": "Google Ireland Ltd.",
+    "categoria": "marketing",
+    "finalidad": "Mostrar mapas incrustados.",
+    "recargar": true,
+    "contenedores": [".acf-map", ".wpgmza_map", ".wpgmp_map_container", ".gmap", "#map", "#mapa", "#map-canvas", "#map_canvas", ".map-canvas"],
+    "cookies": ["NID"],
+    "duracion": "6 meses",
+    "scripts": ["#maps\\.googleapis\\.com/maps/api/js#i", "#maps\\.google\\.[a-z.]+/maps/api/js#i"],
+    "iframes": ["#google\\.[a-z.]+/maps/embed#i", "#maps\\.google\\.[a-z.]+/#i"]
+  }
+}

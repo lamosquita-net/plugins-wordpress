@@ -1,0 +1,319 @@
+/* =================================================================
+   lamosquita-cookies · aspecto
+   -----------------------------------------------------------------
+   AJUSTES — colores, tamaños y posición. Para cada web, mejor que tocar
+   este fichero, sobrescribe las variables desde el CSS de la web:
+
+       .lmc { --lmc-acento: #009999; }
+
+   o, en WordPress, con $a['colores'] del filtro lmc_ajustes
+   ('acento' => '#009999' se convierte en --lmc-acento).
+   ================================================================= */
+.lmc {
+    --lmc-fondo: #ffffff;
+    --lmc-texto: #222222;
+    --lmc-texto-suave: #5a5a5a;
+    --lmc-acento: #222222;            /* bordes de los botones e interruptor encendido */
+    --lmc-boton-fondo: #ffffff;
+    --lmc-boton-texto: #222222;
+    --lmc-boton-fondo-hover: #222222;
+    --lmc-boton-texto-hover: #ffffff;
+    --lmc-borde: #e2e2e2;
+    --lmc-radio: 8px;
+    --lmc-sombra: 0 8px 30px rgba(0, 0, 0, 0.18);
+    --lmc-ancho: 640px;
+    --lmc-margen: 16px;
+    --lmc-capa: 999990;
+    --lmc-letra: inherit;
+    --lmc-tamano: 14px;
+}
+/* ===== fin de AJUSTES ===== */
+
+.lmc,
+.lmc * {
+    box-sizing: border-box;
+}
+
+.lmc [hidden] {
+    display: none !important;
+}
+
+/* --- Aviso ------------------------------------------------------ */
+.lmc-aviso {
+    position: fixed;
+    left: 50%;
+    bottom: var(--lmc-margen);
+    transform: translateX(-50%);
+    z-index: var(--lmc-capa);
+    width: min(var(--lmc-ancho), calc(100vw - 2 * var(--lmc-margen)));
+    max-height: calc(100vh - 2 * var(--lmc-margen));
+    overflow-y: auto;
+    padding: 20px 22px;
+    background: var(--lmc-fondo);
+    color: var(--lmc-texto);
+    border-radius: var(--lmc-radio);
+    box-shadow: var(--lmc-sombra);
+    font-family: var(--lmc-letra);
+    font-size: var(--lmc-tamano);
+    line-height: 1.45;
+    text-align: left;
+}
+
+.lmc-titulo {
+    margin: 0 24px 6px 0;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.lmc-texto {
+    margin: 0 0 14px;
+    color: var(--lmc-texto-suave);
+}
+
+.lmc a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.lmc-cerrar {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    padding: 0 4px;
+    background: none;
+    border: 0;
+    color: var(--lmc-texto-suave);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* --- Botones: los tres con el mismo peso (AEPD) ----------------- */
+.lmc-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.lmc-boton {
+    flex: 1 1 0;
+    min-width: 120px;
+    padding: 10px 14px;
+    background: var(--lmc-boton-fondo);
+    color: var(--lmc-boton-texto);
+    border: 1px solid var(--lmc-acento);
+    border-radius: var(--lmc-radio);
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.lmc-boton:hover,
+.lmc-boton:focus-visible {
+    background: var(--lmc-boton-fondo-hover);
+    color: var(--lmc-boton-texto-hover);
+}
+
+.lmc-boton:focus-visible,
+.lmc-icono:focus-visible,
+.lmc-interruptor input:focus-visible + .lmc-deslizador {
+    outline: 2px solid var(--lmc-acento);
+    outline-offset: 2px;
+}
+
+/* --- Panel de preferencias -------------------------------------- */
+.lmc-panel {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--lmc-borde);
+}
+
+.lmc-categoria {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--lmc-borde);
+}
+
+.lmc-categoria:last-of-type {
+    margin-bottom: 14px;
+}
+
+.lmc-categoria-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.lmc-categoria-nombre {
+    font-weight: bold;
+}
+
+.lmc-siempre {
+    color: var(--lmc-texto-suave);
+    font-size: 0.9em;
+}
+
+.lmc-categoria-descripcion {
+    margin: 4px 0 0;
+    color: var(--lmc-texto-suave);
+    font-size: 0.92em;
+}
+
+.lmc-servicios {
+    margin-top: 6px;
+    font-size: 0.9em;
+}
+
+.lmc-servicios summary {
+    cursor: pointer;
+}
+
+.lmc-servicios ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.lmc-servicios li {
+    margin-bottom: 6px;
+}
+
+.lmc-servicios code {
+    font-size: 0.9em;
+}
+
+/* --- Interruptor ------------------------------------------------- */
+.lmc-interruptor {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.lmc-interruptor input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.lmc-deslizador {
+    position: relative;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 22px;
+    border-radius: 22px;
+    background: var(--lmc-borde);
+    transition: background 0.2s;
+}
+
+.lmc-deslizador::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+}
+
+.lmc-interruptor input:checked + .lmc-deslizador {
+    background: var(--lmc-acento);
+}
+
+.lmc-interruptor input:checked + .lmc-deslizador::after {
+    transform: translateX(18px);
+}
+
+/* --- Icono para reabrir ----------------------------------------- */
+.lmc-icono {
+    position: fixed;
+    bottom: var(--lmc-margen);
+    z-index: var(--lmc-capa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: var(--lmc-fondo);
+    color: var(--lmc-texto);
+    border: 1px solid var(--lmc-borde);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    opacity: 0.85;
+}
+
+.lmc-icono:hover {
+    opacity: 1;
+}
+
+.lmc-icono-izquierda { left: var(--lmc-margen); }
+.lmc-icono-derecha { right: var(--lmc-margen); }
+
+/* --- Contenido bloqueado ---------------------------------------- */
+.lmc-oculto {
+    display: none !important;
+}
+
+.lmc-bloqueado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    width: 100%;
+    padding: 20px;
+    background: #f3f3f3;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.45;
+    text-align: center;
+}
+
+.lmc-bloqueado-caja p {
+    margin: 0 0 10px;
+}
+
+.lmc-bloqueado .lmc-boton {
+    flex: none;
+    min-width: 0;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #fff;
+    color: #333;
+}
+
+@media (max-width: 480px) {
+    .lmc-aviso {
+        bottom: 0;
+        width: 100vw;
+        border-radius: var(--lmc-radio) var(--lmc-radio) 0 0;
+    }
+    .lmc-boton {
+        flex-basis: 100%;
+    }
+}
+
+/* --- Contenedor con contenido bloqueado (un mapa montado por script) --- */
+.lmc-contenedor-bloqueado {
+    position: relative;
+    min-height: 220px;
+}
+
+.lmc-contenedor-bloqueado > :not(.lmc-bloqueado) {
+    visibility: hidden;
+}
+
+.lmc-contenedor-bloqueado > .lmc-bloqueado {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    height: 100%;
+    z-index: 1;
+}
+

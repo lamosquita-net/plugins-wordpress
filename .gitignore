@@ -1,0 +1,15 @@
+# macOS y Google Drive
+.DS_Store
+._*
+Icon?
+.Spotlight-V100
+.Trashes
+
+# Documentación interna: historiales con nombres de clientes, notas de
+# servidores. Nunca entra en el repositorio público.
+*-interno.md
+*-INTERNO.md
+
+# Empaquetado
+/dist/
+*.zip
