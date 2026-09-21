@@ -21,8 +21,10 @@
 # cabecera «Update URI» de los plugins.
 BASE="https://plugins.lamosquita.net"
 # El icono de cada plugin, en SVG cuadrado. %s es el nombre del plugin
-# sin «lamosquita-» (cookies, slider…). Si no existe, se publica sin icono.
+# sin «lamosquita-» (cookies, slider…). Se busca el primero en ICONO y, si
+# no está, en ICONO_2. Si no existe ninguno, se publica sin icono.
 ICONO="imagen-plugins/plugin-%s-fondo.svg"
+ICONO_2="imagen-plugins/plugin-%s.svg"
 # ── fin de AJUSTES ───────────────────────────────────────────────
 
 set -e
@@ -67,6 +69,7 @@ echo "  dist/$ZIP  ($(du -h "dist/$ZIP" | cut -f1 | xargs))"
 
 # El icono, con el nombre fijo del plugin.
 ORIGEN_ICONO=$(printf "$ICONO" "${PLUGIN#lamosquita-}")
+[ -f "$ORIGEN_ICONO" ] || ORIGEN_ICONO=$(printf "$ICONO_2" "${PLUGIN#lamosquita-}")
 if [ -f "$ORIGEN_ICONO" ]; then
   cp "$ORIGEN_ICONO" "dist/$PLUGIN.svg"
   NOMBRE_ICONO="$PLUGIN.svg"
