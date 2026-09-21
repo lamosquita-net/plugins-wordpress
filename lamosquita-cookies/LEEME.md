@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.4.4 · 21/09/2026. Cambios en §11.
+Versión 0.4.5 · 21/09/2026. Cambios en §11.
 
 ---
 
@@ -289,6 +289,11 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.5** · 21/09/2026
+
+- Enlace **«Ajustes»** en Plugins › Plugins instalados, delante de
+  «Desactivar», que lleva a Herramientas › Cookies.
 
 **0.4.4** · 21/09/2026
 

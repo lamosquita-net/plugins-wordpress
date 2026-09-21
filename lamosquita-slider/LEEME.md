@@ -1,6 +1,6 @@
 # lamosquita-slider
 
-Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.1 · 21/09/2026.
+Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.2 · 21/09/2026.
 
 ---
 
@@ -95,6 +95,11 @@ El del slider tiene un reloj sintético (`?reloj=1`) porque el navegador de
 pruebas frena los temporizadores de las pestañas ocultas.
 
 ## 7 · Cambios
+
+**0.1.2** · 21/09/2026
+
+- Enlace **«Sliders»** en Plugins › Plugins instalados, delante de
+  «Desactivar», que lleva a la lista de sliders.
 
 **0.1.1** · 21/09/2026, tras la primera prueba en design
 

@@ -3,7 +3,7 @@
  * Plugin Name:       lamosquita-slider
  * Plugin URI:        https://www.lamosquita.net/
  * Description:       Sliders ligeros, sin jQuery en la web: un formato de imagen por dispositivo, programación por fechas, título encima con su tipografía y tres transiciones en CSS. Varios sliders por web, con shortcode, y preparado para WPML.
- * Version:           0.1.1
+ * Version:           0.1.2
  * Update URI:        https://plugins.lamosquita.net/lamosquita-slider
  * Requires at least: 6.3
  * Tested up to:      7.1.1
@@ -17,10 +17,19 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-const LMQ_SLIDER_VERSION = '0.1.1';
+const LMQ_SLIDER_VERSION = '0.1.2';
 
 define( 'LMQ_SLIDER_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LMQ_SLIDER_URL', plugin_dir_url( __FILE__ ) );
+
+/* En Plugins › Plugins instalados, un enlace a la lista de sliders,
+   delante de «Desactivar». */
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), function ( $enlaces ) {
+	if ( current_user_can( 'edit_pages' ) ) {
+		array_unshift( $enlaces, '<a href="' . esc_url( admin_url( 'edit.php?post_type=lmq_slider' ) ) . '">Sliders</a>' );
+	}
+	return $enlaces;
+} );
 
 // ═══════════════════════════════════════════════════════════════════
 //  AJUSTES
