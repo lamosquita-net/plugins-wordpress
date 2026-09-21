@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.4.0 · 16/09/2026. Cambios en §11.
+Versión 0.4.1 · 21/09/2026. Cambios en §11.
 
 ---
 
@@ -29,6 +29,7 @@ lamosquita-cookies/
   lamosquita-cookies.php   cabecera del plugin y bloque AJUSTES          (WordPress)
   actualizador.php         avisos de versión nueva desde nuestro servidor (§3.1)
   nucleo/                  lo que no depende de WordPress
+    cookie-servidor.php    la cookie de la decisión, fijada desde el servidor (0.4.1)
     lmc-cabecera.js        consentimiento de Google por defecto; va lo PRIMERO del <head>
     lmc.js                 aviso, panel, activación de lo bloqueado, señales, registro
     lmc.css                aspecto; bloque AJUSTES de variables --lmc-*
@@ -285,6 +286,30 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.1** · 21/09/2026
+
+- **La decisión ya no se olvida a la semana en Safari ni en iPhone.** Safari,
+  y todos los navegadores de iPhone porque usan su motor, borran a los 7 días
+  las cookies que escribe JavaScript (`document.cookie`), aunque pidan un
+  año. Era el caso de la nuestra: el aviso volvía a salir cada semana.
+- Ahora, al decidir, `lmc.js` escribe la cookie como antes, para que valga al
+  momento, y además manda la decisión a la propia web. **El servidor la vuelve
+  a fijar** con `Set-Cookie`, con la misma forma y los 12 meses de verdad. Lo
+  hace siempre, esté o no activado el registro de consentimientos.
+- La pieza que arma esa cookie está en `nucleo/cookie-servidor.php`, sin
+  WordPress, para poder usarla también en una web en PHP plano. En el
+  navegador, la clave nueva es `servidor` (la URL); si falta, se usa `endpoint`.
+- Si tras decidir hay que recargar la página, se espera a que conteste el
+  servidor, hasta 1,5 s (`espera_servidor`). Si tarda más, se recarga igual:
+  la cookie del navegador ya está puesta, y la del servidor llega en cuanto
+  conteste, porque la petición sobrevive a la recarga (`keepalive`).
+- El servidor sólo fija la cookie si la versión que manda el navegador es la
+  vigente. Una página vieja abierta desde antes de un cambio no la pisa.
+- Comprobado en un banco local: la cookie de la respuesta es byte a byte la
+  que escribe `lmc.js`, y dura 365 días aunque la del navegador dure 4
+  minutos. Lo que no se ha podido probar aquí es Safari: hay que mirarlo en
+  su inspector web, en Almacenamiento › Cookies.
 
 **0.4.0** · 16/09/2026
 

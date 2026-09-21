@@ -3,7 +3,7 @@
  * Plugin Name:       lamosquita-cookies
  * Plugin URI:        https://www.lamosquita.net/
  * Description:       Aviso de cookies y consentimiento propios: bloqueo previo de terceros, modo de consentimiento v2 de Google (Analytics, Ads y Tag Manager), registro de consentimientos y detección de servicios. Sin dependencias.
- * Version:           0.4.0
+ * Version:           0.4.1
  * Update URI:        https://plugins.lamosquita.net/lamosquita-cookies
  * Requires at least: 6.3
  * Requires PHP:      8.0
@@ -16,7 +16,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-const LMC_VERSION = '0.4.0';
+const LMC_VERSION = '0.4.1';
 const LMC_COOKIE  = 'lmc_consentimiento';
 
 define( 'LMC_DIR', plugin_dir_path( __FILE__ ) );
@@ -105,6 +105,7 @@ function lmc_ajustes() {
 }
 
 require_once LMC_DIR . 'nucleo/reescribir.php';
+require_once LMC_DIR . 'nucleo/cookie-servidor.php';
 require_once LMC_DIR . 'wordpress/servicios.php';
 require_once LMC_DIR . 'wordpress/bloqueo.php';
 require_once LMC_DIR . 'wordpress/registro.php';

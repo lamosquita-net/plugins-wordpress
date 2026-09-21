@@ -32,6 +32,16 @@
     posicion_icono: 'izquierda',
     url_politica: '/politica-de-cookies/',
     endpoint: '',   // URL donde se registra cada decisión; vacío = no se registra
+    // URL a la que se manda la decisión para que el SERVIDOR fije la cookie
+    // (y la registre, si está activado). Safari y todos los navegadores de
+    // iPhone borran a los 7 días las cookies escritas por JavaScript; las
+    // del servidor duran los «meses» de arriba. Vacío = sólo la del navegador.
+    // Si falta, se usa «endpoint».
+    servidor: '',
+    // Si hay que recargar tras decidir, cuánto se espera como mucho a que
+    // el servidor conteste, en milisegundos. Sin respuesta, se recarga igual:
+    // la cookie del navegador ya está puesta.
+    espera_servidor: 1500,
     categorias: [], // [{ id, nombre, descripcion, servicios: [{ nombre, proveedor, finalidad, cookies }] }]
     borrar: {},     // { estadistica: ['_ga', '_ga_*'] } cookies que se borran al retirar el permiso
     textos: {
@@ -171,15 +181,36 @@
   // ---------------------------------------------------------------
   // Registro de la decisión (prueba del consentimiento)
   // ---------------------------------------------------------------
-  function registrar(e, origen) {
-    if (!A.endpoint) return;
+  /**
+   * Manda la decisión al servidor, que fija la cookie de verdad (ver
+   * «servidor» en AJUSTES) y la registra si está activado.
+   *
+   * Con fetch y credentials 'same-origin', no con sendBeacon: la respuesta
+   * de un beacon no se procesa, y sin credenciales el navegador tampoco
+   * guardaría la cookie que manda el servidor.
+   *
+   * Devuelve una promesa que se cumple al contestar el servidor o al
+   * agotar espera_servidor, lo que llegue antes. Nunca falla: si no hay
+   * servidor, la cookie del navegador ya está puesta y la decisión vale.
+   */
+  function enviar(e, origen) {
+    var url = A.servidor || A.endpoint;
+    if (!url || !w.fetch) return Promise.resolve();
     var datos = JSON.stringify({ id: e.id, v: e.v, c: e.c, origen: origen });
+    var peticion;
     try {
-      if (navigator.sendBeacon && navigator.sendBeacon(A.endpoint, new Blob([datos], { type: 'application/json' }))) return;
-    } catch (x) { /* sigue con fetch */ }
-    try {
-      fetch(A.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: datos, keepalive: true, credentials: 'omit' });
-    } catch (x) { /* sin registro, la elección vale igual */ }
+      peticion = fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: datos,
+        keepalive: true,
+        credentials: 'same-origin'
+      }).catch(function () {});
+    } catch (x) {
+      return Promise.resolve();
+    }
+    var tope = new Promise(function (hecho) { setTimeout(hecho, A.espera_servidor); });
+    return Promise.race([peticion, tope]);
   }
 
   // ---------------------------------------------------------------
@@ -285,7 +316,7 @@
     if (typeof w.fbq === 'function') w.fbq('consent', c.marketing ? 'grant' : 'revoke');
     if (typeof w.clarity === 'function') w.clarity('consent', !!c.estadistica);
 
-    registrar(estado, origen);
+    var enviado = enviar(estado, origen);
 
     try { d.dispatchEvent(new CustomEvent('lmc:consentimiento', { detail: { categorias: c, origen: origen } })); } catch (x) { /* navegador antiguo */ }
 
@@ -293,16 +324,18 @@
     var hayQueRecargar = lista(d.querySelectorAll('script[type="text/plain"][data-lmc][data-lmc-recargar], .lmc-contenedor-bloqueado[data-lmc-categoria]')).some(function (el) {
       return c[el.getAttribute('data-lmc') || el.getAttribute('data-lmc-categoria')];
     });
+    // Antes de recargar se espera al servidor: si la página se va antes de
+    // que conteste, su cookie puede perderse.
     if (hayQueRecargar && !retiradas.length) {
       // Un mapa o similar que el theme monta al cargar: activarlo ahora no lo pinta.
-      w.location.reload();
+      enviado.then(function () { w.location.reload(); });
       return;
     }
     if (retiradas.length) {
       // Lo que ya se ha ejecutado no se puede «desejecutar»: se borran sus
       // cookies y se recarga la página para que no vuelva a cargar.
       borrarCookies(retiradas);
-      w.location.reload();
+      enviado.then(function () { w.location.reload(); });
       return;
     }
 

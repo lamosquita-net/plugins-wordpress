@@ -70,10 +70,18 @@ add_action( 'rest_api_init', function () {
 } );
 
 function lmc_rest_registrar( WP_REST_Request $peticion ) {
-	if ( empty( lmc_ajustes()['registrar'] ) ) return new WP_REST_Response( array( 'ok' => true ), 202 );
-
 	$datos = $peticion->get_json_params();
 	if ( ! is_array( $datos ) ) $datos = json_decode( $peticion->get_body(), true );
+
+	// Primero, la cookie: esté o no activado el registro. Es lo que hace que
+	// la decisión dure los meses configurados también en Safari y en iPhone
+	// (ver nucleo/cookie-servidor.php).
+	$valor = lmc_cookie_valor( $datos, lmc_version_consentimiento( lmc_ids_activos() ), time() );
+	if ( null !== $valor ) {
+		lmc_cookie_enviar( LMC_COOKIE, $valor, lmc_ajustes()['meses'], is_ssl() );
+	}
+
+	if ( empty( lmc_ajustes()['registrar'] ) ) return new WP_REST_Response( array( 'ok' => true ), 202 );
 
 	$uid = ( is_array( $datos ) && isset( $datos['id'] ) && is_string( $datos['id'] ) && preg_match( '/^[a-f0-9]{32}$/', $datos['id'] ) ) ? $datos['id'] : '';
 	if ( '' === $uid || empty( $datos['c'] ) || ! is_array( $datos['c'] ) ) {

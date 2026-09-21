@@ -202,7 +202,9 @@ function lmc_config_js() {
 		'icono'          => (bool) $ajustes['icono'],
 		'posicion_icono' => $ajustes['posicion_icono'],
 		'url_politica'   => $ajustes['url_politica'],
-		'endpoint'       => $ajustes['registrar'] ? rest_url( 'lamosquita-cookies/v1/consentimiento' ) : '',
+		// Siempre: aunque el registro esté apagado, el servidor fija la
+		// cookie para que Safari no la borre a los 7 días (0.4.1).
+		'servidor'       => rest_url( 'lamosquita-cookies/v1/consentimiento' ),
 		'categorias'     => $categorias,
 		'contenedores'   => $contenedores,
 		'borrar'         => (object) $borrar,
