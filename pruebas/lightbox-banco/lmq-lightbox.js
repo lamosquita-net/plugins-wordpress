@@ -1,0 +1,1 @@
+../../lamosquita-lightbox/nucleo/lmq-lightbox.js
