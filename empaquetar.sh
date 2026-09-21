@@ -58,7 +58,8 @@ find "$PLUGIN" -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null
 command -v node > /dev/null && find "$PLUGIN" -name '*.js' -print0 | xargs -0 -n1 node --check
 echo "  sintaxis correcta"
 
-rm -rf dist && mkdir -p dist
+# Sólo lo de este plugin: los paquetes de los demás se quedan donde están.
+mkdir -p dist && rm -f "dist/$PLUGIN"-*.zip "dist/$PLUGIN.json" "dist/$PLUGIN.svg"
 ZIP="$PLUGIN-$VERSION.zip"
 zip -rq "dist/$ZIP" "$PLUGIN" \
     -x '*.DS_Store' -x '*/._*' -x '*-interno.md' -x '*-INTERNO.md'

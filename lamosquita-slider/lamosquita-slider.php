@@ -3,7 +3,7 @@
  * Plugin Name:       lamosquita-slider
  * Plugin URI:        https://www.lamosquita.net/
  * Description:       Sliders ligeros, sin jQuery en la web: un formato de imagen por dispositivo, programación por fechas, título encima con su tipografía y tres transiciones en CSS. Varios sliders por web, con shortcode, y preparado para WPML.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Update URI:        https://plugins.lamosquita.net/lamosquita-slider
  * Requires at least: 6.3
  * Tested up to:      7.1.1
@@ -17,7 +17,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-const LMQ_SLIDER_VERSION = '0.1.0';
+const LMQ_SLIDER_VERSION = '0.1.1';
 
 define( 'LMQ_SLIDER_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LMQ_SLIDER_URL', plugin_dir_url( __FILE__ ) );
@@ -44,8 +44,8 @@ const LMQ_SLIDER_CARGA = 'auto';
 
 /* Actualizaciones desde nuestro servidor (mismo actualizador que el resto
    de plugins). La URL se puede cambiar por web con 'lmq_slider_url_actualizaciones'. */
-require_once __DIR__ . '/actualizador.php';
-new Lamosquita_Actualizador(
+$lmq_slider_actualizador = require __DIR__ . '/actualizador.php';   // devuelve el nombre de su clase, con versión
+new $lmq_slider_actualizador(
 	__FILE__,
 	apply_filters( 'lmq_slider_url_actualizaciones', 'https://plugins.lamosquita.net/lamosquita-slider.json' )
 );

@@ -22,7 +22,12 @@ if ( ! is_file( $carpeta . '/actualizador.php' ) ) {
 	fwrite( STDERR, "no encuentro $carpeta/actualizador.php\n" );
 	exit( 1 );
 }
-require $carpeta . '/actualizador.php';
+// El caso que se vio en design: un plugin con un actualizador antiguo carga
+// antes y define su clase. Con el nombre fijo tapaba al nuevo; ya no.
+class Lamosquita_Actualizador { public $soy = 'el antiguo'; }
+
+$clase = require $carpeta . '/actualizador.php';
+$otra  = require $carpeta . '/actualizador.php';   // otro plugin con el mismo fichero
 
 $ok = 0; $mal = 0;
 
@@ -50,7 +55,12 @@ $anfitrion = parse_url( $cab['uri'], PHP_URL_HOST );
 
 echo "\n$plugin $cab[version] · actualiza desde $anfitrion\n";
 
-$a = new Lamosquita_Actualizador( $fichero, 'https://' . $anfitrion . '/' . $plugin . '.json' );
+$a = new $clase( $fichero, 'https://' . $anfitrion . '/' . $plugin . '.json' );
+
+echo "\n=== convivencia de versiones del actualizador ===\n";
+comprueba( 'la clase lleva su versión en el nombre', 1, preg_match( '/^Lamosquita_Actualizador_\d+$/', $clase ) );
+comprueba( 'un actualizador antiguo cargado antes no la tapa', true, $a instanceof $clase && ! $a instanceof Lamosquita_Actualizador );
+comprueba( 'cargar el mismo fichero dos veces no rompe y da la misma clase', $clase, $otra );
 
 echo "\n=== registro del filtro ===\n";
 comprueba( "se engancha a update_plugins_$anfitrion", true,
@@ -184,7 +194,7 @@ $GLOBALS['acciones'] = array();
 $GLOBALS['filtros'] = array();
 $tmp = sys_get_temp_dir() . '/plugin-sin-uri.php';
 file_put_contents( $tmp, "<?php\n/**\n * Plugin Name: sin uri\n * Version: 1.0.0\n */\n" );
-new Lamosquita_Actualizador( $tmp, 'https://ejemplo.net/x.json' );
+new $clase( $tmp, 'https://ejemplo.net/x.json' );
 comprueba( 'no registra ningún filtro', 0, count( $GLOBALS['filtros'] ) );
 comprueba( 'ni ninguna acción', 0, count( $GLOBALS['acciones'] ) );
 unlink( $tmp );

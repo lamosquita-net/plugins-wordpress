@@ -12,8 +12,10 @@
  * propio de cada uno es la llamada que se hace desde su fichero
  * principal:
  *
- *     require_once __DIR__ . '/actualizador.php';
- *     new Lamosquita_Actualizador( __FILE__, 'https://…/lo-que-sea.json' );
+ *     $actualizador = require __DIR__ . '/actualizador.php';
+ *     new $actualizador( __FILE__, 'https://…/lo-que-sea.json' );
+ *
+ * «require», no «require_once»: el fichero devuelve el nombre de su clase.
  *
  * Y su cabecera, que TIENE que llevar la línea:
  *
@@ -39,16 +41,26 @@
  *    administrador carga el escritorio con una versión que el actualizador
  *    no había visto, se tira esa comprobación y se repite en esa misma carga.
  *
- * Si dos plugins nuestros traen este fichero, se define una sola vez (la
- * guarda de class_exists) y cada uno crea su propia instancia. Al tocarlo,
- * hay que copiarlo a todos para que no queden versiones distintas.
+ * LA CLASE LLEVA SU VERSIÓN EN EL NOMBRE. En una web puede haber dos
+ * plugins nuestros con actualizadores de épocas distintas (uno actualizado
+ * y otro no). Con un nombre fijo, el que cargaba primero tapaba al otro, y
+ * WordPress carga los plugins por orden alfabético: un cookies antiguo
+ * dejaba al slider sin su actualizador (visto en design, 21/09/2026).
+ * Con el número en el nombre, cada versión convive con las demás.
+ *
+ * AL CAMBIAR ESTE FICHERO: sube el número de LMQ_ACTUALIZADOR (abajo) y
+ * cópialo a todos los plugins. Dos plugins con el mismo número comparten
+ * la clase (la guarda de class_exists); con números distintos, no.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'Lamosquita_Actualizador' ) ) {
+// ═══════════════════════════════════════════════════════════════════
+//  Versión de este fichero. Súbela en cuanto cambie cualquier cosa.
+// ═══════════════════════════════════════════════════════════════════
+if ( ! class_exists( 'Lamosquita_Actualizador_5' ) ) {
 
-	class Lamosquita_Actualizador {
+	class Lamosquita_Actualizador_5 {
 
 		// ═══════════════════════════════════════════════════════════
 		//  AJUSTES
@@ -270,3 +282,5 @@ if ( ! class_exists( 'Lamosquita_Actualizador' ) ) {
 		}
 	}
 }
+
+return 'Lamosquita_Actualizador_5';

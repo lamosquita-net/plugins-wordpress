@@ -46,3 +46,11 @@
 .lmq-foco__v, .lmq-foco__h { position: absolute; background: #fff; box-shadow: 0 0 0 1px rgb(0 0 0 / .6); pointer-events: none; }
 .lmq-foco__v { top: 0; bottom: 0; width: 1px; }
 .lmq-foco__h { left: 0; right: 0; height: 1px; }
+
+/* Recorte de cada formato sobre la imagen entera: lo de fuera, oscurecido */
+.lmq-foco { overflow: hidden; }
+.lmq-foco__marco { position: absolute; box-shadow: 0 0 0 9999px rgb(0 0 0 / .55); outline: 1px solid #fff; pointer-events: none; }
+
+/* Formato sin imagen propia: la de escritorio, recortada como en la web */
+.lmq-previa { position: relative; margin: 0 auto; overflow: hidden; background: #dcdcde; }
+.lmq-previa img { width: 100%; height: 100%; object-fit: cover; display: block; }

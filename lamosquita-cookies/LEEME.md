@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.4.3 · 21/09/2026. Cambios en §11.
+Versión 0.4.4 · 21/09/2026. Cambios en §11.
 
 ---
 
@@ -289,6 +289,15 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.4** · 21/09/2026
+
+- **El actualizador lleva su versión en el nombre de la clase**
+  (`Lamosquita_Actualizador_5`). En design, un lamosquita-cookies 0.4.1 cargaba
+  antes que el slider y, como la clase se llamaba igual, el slider se quedaba
+  con el actualizador viejo: no salía «al día» y nunca consultaba su JSON.
+  Ahora cada versión convive con las demás. `actualizador.php` devuelve el
+  nombre de su clase, así que el fichero principal no cambia al subirlo.
 
 **0.4.3** · 21/09/2026
 

@@ -1,6 +1,6 @@
 # lamosquita-slider
 
-Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.0 · 21/09/2026.
+Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.1 · 21/09/2026.
 
 ---
 
@@ -95,6 +95,24 @@ El del slider tiene un reloj sintético (`?reloj=1`) porque el navegador de
 pruebas frena los temporizadores de las pestañas ocultas.
 
 ## 7 · Cambios
+
+**0.1.1** · 21/09/2026, tras la primera prueba en design
+
+- **Vista previa de cada formato en el editor.** En los formatos sin imagen
+  propia se ve la de escritorio recortada tal como saldrá en la web; en los que
+  tienen imagen (y en escritorio), la imagen entera con el recorte marcado y lo
+  que no se verá oscurecido. Así se decide si hace falta una imagen distinta
+  para un formato.
+- **Las vistas previas siguen a las proporciones mientras se escriben**, sin
+  perder el cursor. Antes, cambiar una proporción no movía nada.
+- En pantalla completa, la vista previa usa una pantalla típica de cada
+  formato (16:9, 4:3, 3:4, 9:19,5), porque el hueco depende de cada una.
+- **El actualizador lleva su versión en el nombre de la clase**
+  (`Lamosquita_Actualizador_5`). En design, un lamosquita-cookies 0.4.1 cargaba
+  antes que el slider y, como la clase se llamaba igual, el slider se quedaba
+  con el actualizador viejo: no salía «al día» y nunca consultaba su JSON.
+  Ahora cada versión convive con las demás. `actualizador.php` devuelve el
+  nombre de su clase, así que el fichero principal no cambia al subirlo.
 
 **0.1.0** · 21/09/2026
 

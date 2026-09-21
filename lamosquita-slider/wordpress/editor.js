@@ -62,6 +62,51 @@
   datos.programaciones = (datos.programaciones || []).map(normalizar);
 
   function version() { return actual < 0 ? datos.defecto : datos.programaciones[actual]; }
+
+  // En pantalla completa el hueco depende de cada pantalla: para la vista
+  // previa se usa una típica de cada formato.
+  var PANTALLA_TIPICA = { 'escritorio': [16, 9], 'tableta-horizontal': [4, 3], 'tableta-vertical': [3, 4], 'movil': [9, 19.5] };
+
+  /** [ancho, alto] de la proporción del formato en esta versión. */
+  function proporcion(v, f) {
+    if (v.modo === 'pantalla') return PANTALLA_TIPICA[f];
+    var m = String(v.proporciones[f] || '').match(/^\s*(\d+(?:\.\d+)?)\s*[:\/]\s*(\d+(?:\.\d+)?)\s*$/);
+    if (m && +m[1] > 0 && +m[2] > 0) return [+m[1], +m[2]];
+    var n = String(E.nueva.proporciones[f]).split(':');
+    return [+n[0], +n[1]];
+  }
+
+  /**
+   * Coloca sobre la imagen entera el rectángulo que se verá en un hueco de
+   * proporción «prop», con object-fit: cover y el foco como object-position:
+   * el punto del foco de la imagen cae en el mismo punto del hueco.
+   */
+  function marcar(img, marco, prop, foco) {
+    if (!img.naturalWidth) return;
+    var ri = img.naturalWidth / img.naturalHeight, rc = prop[0] / prop[1];
+    var fw = ri > rc ? rc / ri : 1, fh = ri > rc ? 1 : ri / rc;
+    var xy = foco.split(' ').map(function (n) { return parseFloat(n) / 100; });
+    marco.style.left = (xy[0] * (1 - fw) * 100) + '%';
+    marco.style.top = (xy[1] * (1 - fh) * 100) + '%';
+    marco.style.width = (fw * 100) + '%';
+    marco.style.height = (fh * 100) + '%';
+  }
+
+  /** Estilo de la vista previa: su proporción, y como mucho 220 px de alto sin deformarse. */
+  function estiloPrevia(prop) {
+    return 'aspect-ratio:' + prop[0] + ' / ' + prop[1] + ';width:min(100%, ' + Math.round(220 * prop[0] / prop[1]) + 'px)';
+  }
+
+  /** Mientras se teclea una proporción, se mueven las vistas previas y los marcos sin volver a pintar. */
+  function refrescarProporcion(v, f) {
+    var prop = proporcion(v, f);
+    [].forEach.call(raiz.querySelectorAll('[data-lmq-formato="' + f + '"]'), function (caja) {
+      var prev = caja.querySelector('.lmq-previa');
+      if (prev) prev.setAttribute('style', estiloPrevia(prop));
+      var img = caja.querySelector('.lmq-foco img'), marco = caja.querySelector('.lmq-foco__marco');
+      if (img && marco) marcar(img, marco, prop, caja.getAttribute('data-lmq-foco'));
+    });
+  }
   function tieneImagen(s) { return !!(s.imagenes && s.imagenes.escritorio && s.imagenes.escritorio.id); }
   function aInput(f) { return (f || '').replace(' ', 'T'); }     // «2026-12-01 00:00» ⇄ datetime-local
   function deInput(f) { return (f || '').replace('T', ' '); }
@@ -116,7 +161,8 @@
     var props = E.formatos.map(function (f) {
       return h('label', {}, [f.nombre + ' ', h('input', {
         type: 'text', size: 5, value: v.proporciones[f.id], disabled: pantalla, placeholder: '16:9',
-        oninput: function (e) { v.proporciones[f.id] = e.target.value; guardar(); }
+        oninput: function (e) { v.proporciones[f.id] = e.target.value; guardar(); refrescarProporcion(v, f.id); },
+        onchange: function () { pintar(); }
       })]);
     });
     return h('fieldset', { class: 'lmq-bloque' }, [
@@ -161,6 +207,9 @@
     var url = i && E.miniaturas[i.id];
     var foco = (i && i.foco) || '50% 50%';
     var xy = foco.split(' ');
+    var prop = proporcion(v, f.id);
+    var esc = s.imagenes.escritorio;
+    var urlEsc = esc && E.miniaturas[esc.id];
 
     function elegir() {
       var marco = w.wp.media({ title: 'Imagen ' + f.nombre.toLowerCase(), library: { type: 'image' }, button: { text: 'Usar esta imagen' }, multiple: false });
@@ -172,6 +221,9 @@
       });
       marco.open();
     }
+
+    var marco = h('span', { class: 'lmq-foco__marco' });
+    var fotoFoco = url ? h('img', { src: url, alt: '', onload: function (e) { marcar(e.target, marco, prop, foco); } }) : null;
 
     var cuadro = url
       ? h('div', {
@@ -185,20 +237,36 @@
             guardar(); pintar();
           }
         }, [
-          h('img', { src: url, alt: '' }),
+          fotoFoco,
+          marco,
           h('span', { class: 'lmq-foco__v', style: 'left:' + xy[0] }),
           h('span', { class: 'lmq-foco__h', style: 'top:' + xy[1] })
         ])
-      : h('button', { type: 'button', class: 'lmq-hueco', onclick: elegir }, f.id === 'escritorio' ? 'Elegir imagen (obligatoria)' : 'Elegir imagen (opcional)');
+      : (f.id !== 'escritorio' && urlEsc
+          // Sin imagen propia: cómo saldrá en la web con la de escritorio.
+          ? h('div', { class: 'lmq-previa', style: estiloPrevia(prop) }, [
+              h('img', { src: urlEsc, alt: '', style: 'object-position:' + (esc.foco || '50% 50%') })
+            ])
+          : h('button', { type: 'button', class: 'lmq-hueco', onclick: elegir }, f.id === 'escritorio' ? 'Elegir imagen (obligatoria)' : 'Elegir imagen (opcional)'));
 
-    return h('figure', { class: 'lmq-formato' + (f.id === 'escritorio' && !url ? ' es-falta' : '') }, [
-      h('figcaption', {}, f.nombre + ' · ' + v.proporciones[f.id]),
-      cuadro,
-      url ? h('div', { class: 'lmq-formato__pie' }, [
-        h('span', {}, 'foco ' + foco),
+    var pie;
+    if (url) {
+      pie = h('div', { class: 'lmq-formato__pie' }, [
+        h('span', {}, 'foco ' + foco + ' · lo oscuro no se verá'),
         h('button', { type: 'button', class: 'button-link', onclick: elegir }, 'Cambiar'),
         h('button', { type: 'button', class: 'button-link lmq-borrar', onclick: function () { delete s.imagenes[f.id]; guardar(); pintar(); } }, 'Quitar')
-      ]) : (f.id === 'escritorio' ? null : h('div', { class: 'lmq-formato__pie' }, 'Sin imagen propia: usa la de escritorio, recortada alrededor de su foco.'))
+      ]);
+    } else if (f.id !== 'escritorio' && urlEsc) {
+      pie = h('div', { class: 'lmq-formato__pie' }, [
+        h('span', {}, 'Así saldrá con la de escritorio.'),
+        h('button', { type: 'button', class: 'button-link', onclick: elegir }, 'Elegir imagen propia')
+      ]);
+    }
+
+    return h('figure', { class: 'lmq-formato' + (f.id === 'escritorio' && !url ? ' es-falta' : ''), 'data-lmq-formato': f.id, 'data-lmq-foco': url ? foco : ((esc && esc.foco) || '50% 50%') }, [
+      h('figcaption', {}, f.nombre + ' · ' + (v.modo === 'pantalla' ? 'pantalla típica ' + prop.join(':') : v.proporciones[f.id])),
+      cuadro,
+      pie
     ]);
   }
 
