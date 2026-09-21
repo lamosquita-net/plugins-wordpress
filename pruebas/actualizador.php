@@ -61,11 +61,16 @@ limpia(); respuesta_json( array( 'version' => '99.0.0', 'package' => 'https://x/
 $r = $a->comprobar( false, $datos, $mio );
 comprueba( 'una versión mayor → avisa', '99.0.0', is_array( $r ) ? $r['version'] : null );
 
+// Con la misma versión, o una anterior, se contesta igual: WordPress
+// compara y lo anota como «al día». Sin eso no ofrece el interruptor de
+// actualizaciones automáticas.
 limpia(); respuesta_json( array( 'version' => $cab['version'] ) );
-comprueba( 'la misma versión → no avisa', false, $a->comprobar( false, $datos, $mio ) );
+$r = $a->comprobar( false, $datos, $mio );
+comprueba( 'la misma versión → contesta con ella (WordPress la da por al día)', $cab['version'], is_array( $r ) ? $r['version'] : null );
 
 limpia(); respuesta_json( array( 'version' => '0.0.1' ) );
-comprueba( 'una versión anterior → no avisa', false, $a->comprobar( false, $datos, $mio ) );
+$r = $a->comprobar( false, $datos, $mio );
+comprueba( 'una versión anterior → contesta igual; no avisa porque compara WordPress', '0.0.1', is_array( $r ) ? $r['version'] : null );
 
 limpia(); respuesta_json( array( 'version' => '0.10.0' ) );
 $datos_09 = array_merge( $datos, array( 'Version' => '0.9.0' ) );
@@ -117,6 +122,43 @@ comprueba( 'package', 'https://x/z.zip', $r['package'] );
 comprueba( 'id = la cabecera Update URI', $cab['uri'], $r['id'] );
 comprueba( 'requires_php', '8.0', $r['requires_php'] );
 comprueba( 'sin "url" en el JSON, cae al Plugin URI', $cab['plugin_uri'], $r['url'] );
+
+echo "\n=== icono y «probado hasta» ===\n";
+limpia(); respuesta_json( array( 'version' => '99.0.0', 'tested' => '7.1.1',
+	'icons' => array( 'svg' => 'https://x/icono.svg', '2x' => 'http://x/inseguro.png', 'raro' => 'https://x/r.png' ) ) );
+$r = $a->comprobar( false, $datos, $mio );
+comprueba( 'pasa «tested» a WordPress', '7.1.1', $r['tested'] );
+comprueba( 'icono svg por https, sí', 'https://x/icono.svg', $r['icons']['svg'] ?? null );
+comprueba( 'icono por http, no', false, isset( $r['icons']['2x'] ) );
+comprueba( 'claves que WordPress no entiende, fuera', false, isset( $r['icons']['raro'] ) );
+
+echo "\n=== entrando en Escritorio › Actualizaciones no se usa la copia ===\n";
+limpia(); respuesta_json( array( 'version' => '99.0.0' ) );
+$a->comprobar( false, $datos, $mio );                        // llena la copia de 6 h
+respuesta_json( array( 'version' => '99.1.0' ) );            // se publica otra
+$r = $a->comprobar( false, $datos, $mio );
+comprueba( 'comprobación de fondo → la copia guardada', '99.0.0', $r['version'] );
+$GLOBALS['accion_actual'] = 'load-update-core.php';
+$r = $a->comprobar( false, $datos, $mio );
+$GLOBALS['accion_actual'] = '';
+comprueba( 'desde Actualizaciones → pregunta de nuevo y ve la nueva', '99.1.0', $r['version'] );
+comprueba( 'y la copia queda al día para lo siguiente', '99.1.0', $a->comprobar( false, $datos, $mio )['version'] );
+
+echo "\n=== ventana «Ver detalles» ===\n";
+limpia(); respuesta_json( array( 'version' => '99.0.0', 'package' => 'https://x/z.zip', 'fecha' => '2026-09-21',
+	'sections' => array( 'description' => '<p>Qué hace</p>', 'changelog' => '<h4>99.0.0</h4>' ),
+	'icons' => array( 'svg' => 'https://x/icono.svg' ) ) );
+$d = $a->detalles( false, 'plugin_information', (object) array( 'slug' => $plugin ) );
+comprueba( 'para nuestro plugin contesta nosotros', true, is_object( $d ) );
+comprueba( 'con el nombre de la cabecera', get_file_data( $fichero, array( 'n' => 'Plugin Name' ) )['n'], $d->name );
+comprueba( 'con la versión publicada', '99.0.0', $d->version );
+comprueba( 'con la descripción y los cambios', array( 'description', 'changelog' ), array_keys( $d->sections ) );
+comprueba( 'con el enlace de descarga', 'https://x/z.zip', $d->download_link );
+comprueba( 'otro plugin → no se toca', 'intacto', $a->detalles( 'intacto', 'plugin_information', (object) array( 'slug' => 'otro-plugin' ) ) );
+comprueba( 'otra acción de la API → no se toca', 'intacto', $a->detalles( 'intacto', 'query_plugins', (object) array( 'slug' => $plugin ) ) );
+limpia(); respuesta_error();
+comprueba( 'servidor caído → error, no false (si no, WordPress iría a wordpress.org)', true,
+	$a->detalles( false, 'plugin_information', (object) array( 'slug' => $plugin ) ) instanceof WP_Error );
 
 echo "\n=== sin cabecera Update URI no se engancha a nada ===\n";
 $GLOBALS['filtros'] = array();

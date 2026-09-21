@@ -44,6 +44,10 @@ function apply_filters( $hook, $valor ) {
 	return $args[0];
 }
 
+/** Qué acción de WordPress «está en marcha»: se pone a mano en las pruebas. */
+$GLOBALS['accion_actual'] = '';
+function doing_action( $accion ) { return $GLOBALS['accion_actual'] === $accion; }
+
 function get_transient( $clave ) { return $GLOBALS['transients'][ $clave ] ?? false; }
 function set_transient( $clave, $valor, $segundos ) { $GLOBALS['transients'][ $clave ] = $valor; return true; }
 
@@ -52,7 +56,10 @@ function wp_remote_get( $url, $args = array() ) {
 	return $GLOBALS['respuesta'];
 }
 
-class WP_Error {}
+class WP_Error {
+	public $codigo;
+	public function __construct( $codigo = '', $mensaje = '' ) { $this->codigo = $codigo; }
+}
 function is_wp_error( $x ) { return $x instanceof WP_Error; }
 function wp_remote_retrieve_response_code( $r ) { return $r['response']['code'] ?? 0; }
 function wp_remote_retrieve_body( $r ) { return $r['body'] ?? ''; }

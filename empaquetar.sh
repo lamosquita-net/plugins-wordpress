@@ -7,17 +7,22 @@
 #   ./empaquetar.sh lamosquita-cookies
 #
 # Deja en dist/:
-#   lamosquita-cookies-0.4.0.zip   el paquete que instala WordPress
-#   lamosquita-cookies.json        lo que lee el actualizador
+#   lamosquita-cookies-0.4.2.zip   el paquete que instala WordPress
+#   lamosquita-cookies.json        lo que lee el actualizador: versión,
+#                                  descripción, cambios, icono…
+#   lamosquita-cookies.svg         el icono, si lo hay
 #
-# Los dos se suben a la raíz de BASE (abajo). El JSON siempre con el
-# mismo nombre: es la dirección fija que consultan las webs.
+# Todo se sube a la raíz de BASE (abajo). El JSON y el icono siempre con
+# el mismo nombre: son las direcciones fijas que consultan las webs.
 # =================================================================
 
 # ── AJUSTES ──────────────────────────────────────────────────────
 # Dónde se sirven el JSON y los ZIP. Tiene que coincidir con la
 # cabecera «Update URI» de los plugins.
 BASE="https://plugins.lamosquita.net"
+# El icono de cada plugin, en SVG cuadrado. %s es el nombre del plugin
+# sin «lamosquita-» (cookies, slider…). Si no existe, se publica sin icono.
+ICONO="imagen-plugins/plugin-%s-fondo.svg"
 # ── fin de AJUSTES ───────────────────────────────────────────────
 
 set -e
@@ -59,18 +64,22 @@ zip -rq "dist/$ZIP" "$PLUGIN" \
     -x '*.DS_Store' -x '*/._*' -x '*-interno.md' -x '*-INTERNO.md'
 echo "  dist/$ZIP  ($(du -h "dist/$ZIP" | cut -f1 | xargs))"
 
-cat > "dist/$PLUGIN.json" <<JSON
-{
-  "id": "$URI",
-  "slug": "$PLUGIN",
-  "version": "$VERSION",
-  "url": "https://github.com/lamosquita-net/plugins-wordpress/tree/main/$PLUGIN",
-  "package": "$BASE/$ZIP",
-  "requires": "$REQUIERE",
-  "requires_php": "$REQUIERE_PHP"
-}
-JSON
+# El icono, con el nombre fijo del plugin.
+ORIGEN_ICONO=$(printf "$ICONO" "${PLUGIN#lamosquita-}")
+if [ -f "$ORIGEN_ICONO" ]; then
+  cp "$ORIGEN_ICONO" "dist/$PLUGIN.svg"
+  NOMBRE_ICONO="$PLUGIN.svg"
+  echo "  dist/$PLUGIN.svg  (de $ORIGEN_ICONO)"
+else
+  NOMBRE_ICONO="-"
+  echo "  (sin icono: no existe $ORIGEN_ICONO)"
+fi
+
+# El JSON lo arma PHP: convierte el Markdown y escapa lo que haga falta.
+php herramientas/publicacion.php "$PLUGIN" "$BASE" "$ZIP" "$NOMBRE_ICONO" "dist/$PLUGIN.json"
+php -r 'json_decode(file_get_contents($argv[1])); exit(json_last_error() ? 1 : 0);' "dist/$PLUGIN.json" \
+  || { echo "el JSON no es válido"; exit 1; }
 echo "  dist/$PLUGIN.json"
 echo
-echo "Subir los dos a $BASE/ y comprobar:"
+echo "Subir todo lo de dist/ a $BASE/ y comprobar:"
 echo "  curl -s $BASE/$PLUGIN.json"

@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.4.1 · 21/09/2026. Cambios en §11.
+Versión 0.4.2 · 21/09/2026. Cambios en §11.
 
 ---
 
@@ -92,7 +92,10 @@ siempre el mismo nombre, porque es la dirección fija que consultan las
 webs; el ZIP lleva el número de versión, así que las versiones antiguas
 siguen ahí y se puede volver atrás.
 
-Cada web pregunta como mucho una vez cada 6 horas (`Lamosquita_Actualizador::CACHE`),
+Entrando en **Escritorio › Actualizaciones** se pregunta siempre, sin esperar a
+ninguna copia (WordPress lo hace como mucho una vez por minuto). En las
+comprobaciones de fondo, cada web pregunta como mucho una vez cada 6 horas
+(`Lamosquita_Actualizador::CACHE`),
 y si el servidor no contesta se calla durante 30 minutos en vez de
 insistir en cada carga del escritorio. Que el servidor esté caído no rompe
 nada: sólo no hay aviso.
@@ -286,6 +289,27 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.2** · 21/09/2026
+
+- **Actualizaciones automáticas.** Ya se puede activar el interruptor en
+  Plugins. WordPress sólo lo ofrece si el plugin está en su lista de «hay
+  actualización» o en la de «al día», y el actualizador sólo contestaba
+  cuando había versión nueva. Ahora contesta siempre y compara WordPress.
+- **Icono** en Escritorio › Actualizaciones, sacado de `imagen-plugins/`.
+  Como es el actualizador instalado el que se lo pasa a WordPress, se verá a
+  partir de la actualización siguiente a ésta.
+- **«Compatibilidad con WordPress: sí».** Nueva cabecera `Tested up to`, que
+  el empaquetador pasa al JSON. Hay que subirla cada vez que se pruebe con
+  una versión nueva de WordPress.
+- **Entrar en Escritorio › Actualizaciones enseña lo último.** Antes, una web
+  que hubiera preguntado en las 6 horas anteriores no veía la versión nueva.
+  «Comprobar de nuevo» no ayudaba: sólo fuerza la comprobación de WordPress,
+  no la de los plugins.
+- **«Ver detalles» enseña nuestra ficha**: descripción (del README), los
+  últimos cambios (de este apartado) y el icono. Antes WordPress la buscaba en
+  wordpress.org por el nombre de la carpeta. Si el servidor no contesta, sale
+  un error en vez de dejar que WordPress la busque allí.
 
 **0.4.1** · 21/09/2026
 
