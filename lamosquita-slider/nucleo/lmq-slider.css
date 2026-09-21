@@ -1,0 +1,167 @@
+/* =================================================================
+   lamosquita-slider · aspecto
+   -----------------------------------------------------------------
+   AJUSTES — todo lo de dentro del slider sale de aquí. El theme sólo
+   lo coloca (ancho, márgenes, en qué columna). Para cambiar algo en una
+   web sin tocar este fichero, desde el CSS del theme:
+
+       .lmq-slider { --lmq-duracion: 1.5s; }
+
+   Lo que se elige en el escritorio (proporciones, tiempo, tipografía y
+   color del título, foco de cada imagen) llega como variables en el
+   propio HTML y manda sobre esto.
+   ================================================================= */
+.lmq-slider {
+    --lmq-duracion: 1s;                            /* lo que dura la transición */
+    --lmq-zoom: 1.08;                              /* cuánto se acerca en «zoom» */
+    --lmq-alto-pantalla: 100svh;                   /* alto en modo pantalla completa */
+    --lmq-fondo: transparent;                      /* lo que se ve mientras llega la 1.ª imagen */
+    --lmq-titulo-margen: clamp(1rem, 4vw, 3rem);   /* del título al borde */
+    --lmq-titulo-ancho: none;                      /* ancho máximo del título, p. ej. 30ch */
+    --lmq-titulo-interlineado: 1.1;
+    --lmq-titulo-sombra: none;                     /* p. ej. 0 1px 8px rgb(0 0 0 / .5) */
+}
+/*  Tramos de pantalla. TIENEN QUE SER LOS MISMOS que lmq_slider_formatos()
+    en nucleo/pintar.php. Aquí van de lo general a lo concreto, al revés
+    que allí, porque en CSS gana la última regla que encaja:
+
+      tableta-horizontal   (max-width: 1199px) and (orientation: landscape)
+      tableta-vertical     (max-width: 1199px) and (orientation: portrait)
+      movil                (max-width: 599px) and (orientation: portrait)
+
+    Lo que no encaja en ninguno es «escritorio».                        */
+/* ===== fin de AJUSTES ===== */
+
+
+/* --- El hueco ---------------------------------------------------- */
+.lmq-slider {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--lmq-fondo);
+}
+/* El alto se sabe antes de que llegue la imagen: la página no salta. */
+.lmq-slider--proporcion { aspect-ratio: var(--lmq-prop-escritorio, 16 / 9); }
+.lmq-slider--pantalla   { height: var(--lmq-alto-pantalla); }
+
+/* --- Slides ------------------------------------------------------ */
+.lmq-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--lmq-duracion) ease, visibility 0s linear var(--lmq-duracion);
+}
+.lmq-slide.es-actual {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    transition: opacity var(--lmq-duracion) ease;
+}
+/* La que se va se queda opaca debajo mientras entra la nueva: así el
+   fundido no deja ver el fondo a mitad de camino. */
+.lmq-slide.es-saliente {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+    transition: none;
+}
+
+.lmq-slide__marco {
+    position: absolute;
+    inset: 0;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+.lmq-slide__marco:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: -6px;
+}
+.lmq-slide picture,
+.lmq-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.lmq-slide img {
+    object-fit: cover;
+    object-position: var(--lmq-foco-escritorio, 50% 50%);
+}
+
+/* --- Transición: desplazar --------------------------------------- */
+.lmq-slider--desplazar .lmq-slide {
+    opacity: 1;
+    transform: translateX(100%);
+    transition: none;
+}
+.lmq-slider--desplazar .lmq-slide.es-actual,
+.lmq-slider--desplazar .lmq-slide.es-saliente {
+    visibility: visible;
+    transition: transform var(--lmq-duracion) ease;
+}
+.lmq-slider--desplazar .lmq-slide.es-actual   { transform: none; }
+.lmq-slider--desplazar .lmq-slide.es-saliente { transform: translateX(-100%); }
+
+/* --- Transición: zoom (fundido + acercamiento lento) -------------- */
+/* Sólo con .lmq-listo, que pone el JS: así la primera también se mueve. */
+.lmq-slider--zoom .lmq-slide img {
+    transform: scale(1);
+    transition: none;
+}
+.lmq-slider--zoom.lmq-listo .lmq-slide.es-actual img {
+    transform: scale(var(--lmq-zoom));
+    transition: transform calc(var(--lmq-tiempo, 5s) + var(--lmq-duracion)) linear;
+}
+.lmq-slider--zoom .lmq-slide.es-saliente img {
+    transform: scale(var(--lmq-zoom));
+}
+
+/* --- Título ------------------------------------------------------ */
+.lmq-slide__texto {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    padding: var(--lmq-titulo-margen);
+    pointer-events: none;
+}
+.lmq-titulo {
+    max-width: var(--lmq-titulo-ancho);
+    font-size: var(--lmq-titulo-tamano, 2.5rem);
+    font-weight: var(--lmq-titulo-peso, 700);
+    line-height: var(--lmq-titulo-interlineado);
+    color: var(--lmq-titulo-color, #fff);
+    text-shadow: var(--lmq-titulo-sombra);
+}
+.lmq-pos--arriba-izquierda { align-items: flex-start; justify-content: flex-start; text-align: left; }
+.lmq-pos--arriba-centro    { align-items: flex-start; justify-content: center;     text-align: center; }
+.lmq-pos--arriba-derecha   { align-items: flex-start; justify-content: flex-end;   text-align: right; }
+.lmq-pos--centro-izquierda { align-items: center;     justify-content: flex-start; text-align: left; }
+.lmq-pos--centro           { align-items: center;     justify-content: center;     text-align: center; }
+.lmq-pos--centro-derecha   { align-items: center;     justify-content: flex-end;   text-align: right; }
+.lmq-pos--abajo-izquierda  { align-items: flex-end;   justify-content: flex-start; text-align: left; }
+.lmq-pos--abajo-centro     { align-items: flex-end;   justify-content: center;     text-align: center; }
+.lmq-pos--abajo-derecha    { align-items: flex-end;   justify-content: flex-end;   text-align: right; }
+
+/* --- Formatos: los tramos del bloque AJUSTES ---------------------- */
+@media (max-width: 1199px) and (orientation: landscape) { /* tableta-horizontal */
+    .lmq-slider--proporcion { aspect-ratio: var(--lmq-prop-tableta-horizontal, 16 / 9); }
+    .lmq-slide img { object-position: var(--lmq-foco-tableta-horizontal, 50% 50%); }
+}
+@media (max-width: 1199px) and (orientation: portrait) { /* tableta-vertical */
+    .lmq-slider--proporcion { aspect-ratio: var(--lmq-prop-tableta-vertical, 3 / 4); }
+    .lmq-slide img { object-position: var(--lmq-foco-tableta-vertical, 50% 50%); }
+}
+@media (max-width: 599px) and (orientation: portrait) { /* movil */
+    .lmq-slider--proporcion { aspect-ratio: var(--lmq-prop-movil, 9 / 16); }
+    .lmq-slide img { object-position: var(--lmq-foco-movil, 50% 50%); }
+    .lmq-titulo { font-size: var(--lmq-titulo-tamano-movil, 1.5rem); }
+}
+
+/* --- Quien tiene desactivadas las animaciones en su sistema ------- */
+@media (prefers-reduced-motion: reduce) {
+    .lmq-slide,
+    .lmq-slide img { transition-duration: 0s !important; }
+    .lmq-slider--zoom .lmq-slide img { transform: none !important; }
+}

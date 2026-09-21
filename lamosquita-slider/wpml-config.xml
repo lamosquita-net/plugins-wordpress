@@ -1,0 +1,12 @@
+<wpml-config>
+	<!-- Cada slider se traduce como una entrada: cada idioma tiene su copia,
+	     con sus imágenes, sus títulos y sus enlaces. -->
+	<custom-types>
+		<custom-type translate="1">lmq_slider</custom-type>
+	</custom-types>
+	<!-- Al crear la traducción se copia todo el slider una vez; a partir de
+	     ahí cada idioma se edita por su cuenta. -->
+	<custom-fields>
+		<custom-field action="copy-once">_lmq_slider</custom-field>
+	</custom-fields>
+</wpml-config>

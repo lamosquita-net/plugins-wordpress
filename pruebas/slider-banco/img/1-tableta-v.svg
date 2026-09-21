@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+<rect width="100%" height="100%" fill="#8b5a2b"/>
+<g stroke="#fff" stroke-width="6" opacity=".85"><line x1="450" y1="0" x2="450" y2="1200"/><line x1="0" y1="600" x2="900" y2="600"/></g>
+<text x="50%" y="50%" fill="#fff" font-family="Helvetica, Arial, sans-serif" font-size="64" font-weight="700" text-anchor="middle" dominant-baseline="middle">1 · TABLETA V 3:4</text>
+</svg>

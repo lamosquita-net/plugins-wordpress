@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<title>Banco · editor de lamosquita-slider</title>
+<!-- Banco del editor sin WordPress:
+       php -S 127.0.0.1:8492 -t pruebas/slider-editor-banco
+     Imita lo justo: el JSON de partida, window.LMQ_EDITOR y una biblioteca
+     de medios (wp.media) que devuelve, por turno, las imágenes de prueba. -->
+<link rel="stylesheet" href="editor.css">
+<style>body{font:13px/1.5 -apple-system,system-ui,sans-serif;margin:20px;max-width:1000px}
+.button{padding:3px 10px}.button-primary{background:#2271b1;color:#fff;border:0;padding:6px 12px}.button-link{background:none;border:0;color:#2271b1;cursor:pointer;text-decoration:underline}.description{color:#646970}</style>
+</head><body>
+<textarea id="lmq-slider-datos" hidden>{"defecto":{"modo":"proporcion","tiempo":5,"transicion":"fundido","proporciones":{"escritorio":"16:9","tableta-horizontal":"16:9","tableta-vertical":"3:4","movil":"9:16"},"titulo":{"tamano":"2.5rem","tamano_movil":"1.5rem","peso":"700","color":"#ffffff","posicion":"abajo-izquierda"},"slides":[]},"programaciones":[]}</textarea>
+<div id="lmq-editor"></div>
+<script>
+window.LMQ_EDITOR = {
+  miniaturas: {},
+  formatos: [{id:'escritorio',nombre:'Escritorio'},{id:'tableta-horizontal',nombre:'Tableta horizontal'},{id:'tableta-vertical',nombre:'Tableta vertical'},{id:'movil',nombre:'Móvil vertical'}],
+  posiciones: ['arriba-izquierda','arriba-centro','arriba-derecha','centro-izquierda','centro','centro-derecha','abajo-izquierda','abajo-centro','abajo-derecha'],
+  transiciones: {fundido:'Fundido',desplazar:'Desplazar',zoom:'Fundido con zoom lento'},
+  nueva: {modo:'proporcion',tiempo:5,transicion:'fundido',proporciones:{'escritorio':'16:9','tableta-horizontal':'16:9','tableta-vertical':'3:4','movil':'9:16'},titulo:{tamano:'2.5rem',tamano_movil:'1.5rem',peso:'700',color:'#ffffff',posicion:'abajo-izquierda'},slides:[]},
+  zona: 'Europe/Madrid'
+};
+// Biblioteca de medios de mentira: cada vez que se abre, «elige» la siguiente.
+window.__biblioteca = [
+  {id:10,url:'img/1-escritorio.svg'},{id:11,url:'img/1-movil.svg'},{id:12,url:'img/2-escritorio.svg'},{id:13,url:'img/1-tableta-h.svg'}
+];
+window.__elegidas = 0;
+window.wp = { media: function () {
+  var alElegir;
+  return {
+    on: function (ev, fn) { if (ev === 'select') alElegir = fn; },
+    state: function () { return { get: function () { return { first: function () { return { toJSON: function () {
+      var a = window.__biblioteca[window.__elegidas++ % window.__biblioteca.length]; return { id: a.id, url: a.url, sizes: { medium: { url: a.url } } }; } }; } }; } }; },
+    open: function () { alElegir(); }
+  };
+} };
+window.confirm = function () { return true; };   // en el banco, a todo que sí
+</script>
+<script src="editor.js"></script>
+</body></html>
