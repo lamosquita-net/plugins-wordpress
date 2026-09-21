@@ -11,6 +11,10 @@
  * con su tamaño escrito encima, para ver cuál baja el navegador.
  *
  * ?ciclico=1   pasar de la última a la primera
+ * ?paspartu=1  el pie en un paspartú blanco (si no, sobre el fondo oscuro)
+ *
+ * La página de contacto (contacto/) se abre en ventana, como si estuviera
+ * elegida en los ajustes.
  */
 define( 'ABSPATH', __DIR__ . '/' );
 require dirname( __DIR__, 2 ) . '/lamosquita-lightbox/nucleo/enlaces.php';
@@ -43,6 +47,15 @@ foreach ( $colores as $n => $color ) {
 	}
 	$fotos[ $n + 1 ] = $meta;
 }
+// Títulos y descripciones, como los de la biblioteca de medios.
+$textos = array(
+	1 => array( 'autorretrato con una hasselblad 503cw', "sonnar 150mm f4\nfuji velvia 50" ),
+	2 => array( 'foto-2', '{"Make":"NIKON CORPORATION","Model":"NIKON D90","DateTimeOriginal":"2012:08:17 10:02:15","ExposureTime":"10/1250","FNumber":5.6,"ISOSpeedRatings":100,"FocalLength":"18mm","Software":"Capture One"}' ),
+	3 => array( 'brachypelma smithi', "Rolleiflex sl66\nplanar 80mm f2.8\nkodak tri-x 400\n\nUna descripción larga para ver qué pasa cuando no cabe: la foto se reduce un poco y el texto, si pasa de un tercio de la pantalla, se desplaza dentro de su recuadro. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." ),
+	4 => array( 'IMG_1165-Exposure', '#image_title' ),
+	5 => array( 'la barra', '' ),
+	6 => array( '', 'sólo descripción, sin título' ),
+);
 // Para el banco la extensión .svg cuenta como foto.
 $orig = "$base/foto-%d.svg";
 $mini = function ( $n ) use ( $base, $fotos ) { return $base . '/' . $fotos[ $n ]['sizes']['t300']['file']; };
@@ -88,6 +101,9 @@ ob_start();
 <p>Un <a id="suelto" href="<?php echo $base . '/' . $fotos[3]['sizes']['t1024']['file']; ?>" title="Del title">enlace a un tamaño intermedio</a> (debe abrir la de 2048),
 un <a class="nolightbox" id="excluido" href="<?php printf( $orig, 4 ); ?>">enlace excluido</a> (nolightbox: abre la foto tal cual),
 un <a id="pdf" href="dossier.pdf">PDF</a> y un <a href="https://example.com/foto.jpg" id="externo">.jpg de otra web</a>.</p>
+<h2>4 · Páginas en ventana</h2>
+<p>Un <a id="contacto" href="/lightbox-banco/contacto/">enlace a Contacto</a> (elegida en los ajustes), el mismo <a href="/lightbox-banco/contacto">sin barra final</a>,
+uno con la <a class="lmq-modal" id="suelta" href="/lightbox-banco/contacto/?desde=clase">clase lmq-modal</a> y uno a la <a id="normal" href="/lightbox-banco/?otra=1">página normal</a> (no se abre en ventana).</p>
 <p style="height:60vh">(espacio para comprobar que la página no se mueve al abrir y cerrar)</p>
 </body></html>
 <?php
@@ -99,15 +115,18 @@ $mapa = array();
 foreach ( $enlaces as $href => $ruta ) {
 	foreach ( $ruta ? lmq_lightbox_candidatos( $ruta ) : array() as $c ) {
 		if ( preg_match( '/^foto-(\d)\.jpg$/', $c, $m ) ) {
-			$v = lmq_lightbox_variantes( $fotos[ $m[1] ], $base, 2048 );
+			$v = lmq_lightbox_variantes( $fotos[ $m[1] ], $base, 2048 ) + lmq_lightbox_pie( $textos[ $m[1] ][0], $textos[ $m[1] ][1], "foto-{$m[1]}.svg" );
 			$mapa[ str_replace( '.jpg', '.svg', $href ) ] = $v;
 			break;
 		}
 	}
 }
 $html = lmq_lightbox_anotar( $html, $mapa );
-$config = array( 'ciclico' => ! empty( $_GET['ciclico'] ), 'pie' => true, 'textos' => array( 'visor' => 'Visor de fotos', 'cerrar' => 'Cerrar', 'anterior' => 'Foto anterior', 'siguiente' => 'Foto siguiente' ) );
+$config = array( 'ciclico' => ! empty( $_GET['ciclico'] ), 'estilo' => empty( $_GET['paspartu'] ) ? 'fondo' : 'paspartu', 'pie' => true, 'textos' => array( 'visor' => 'Visor de fotos', 'cerrar' => 'Cerrar', 'anterior' => 'Foto anterior', 'siguiente' => 'Foto siguiente' ) );
 echo lmq_lightbox_con_recursos( $html,
 	"<link rel='stylesheet' href='lmq-lightbox.css?" . filemtime( __DIR__ . '/lmq-lightbox.css' ) . "'>\n"
 	. '<script>window.LMQ_LIGHTBOX = ' . json_encode( $config ) . ";</script>\n"
-	. "<script src='lmq-lightbox.js?" . filemtime( __DIR__ . '/lmq-lightbox.js' ) . "' defer></script>\n" );
+	. "<script src='lmq-lightbox.js?" . filemtime( __DIR__ . '/lmq-lightbox.js' ) . "' defer></script>\n"
+	. "<link rel='stylesheet' href='lmq-modal.css?" . filemtime( __DIR__ . '/lmq-modal.css' ) . "'>\n"
+	. '<script>window.LMQ_MODAL = ' . json_encode( array( 'urls' => array( 'http://' . $_SERVER['HTTP_HOST'] . '/lightbox-banco/contacto/' ), 'ancho' => 700, 'textos' => array( 'cerrar' => 'Cerrar', 'ventana' => 'Ventana' ) ) ) . ";</script>\n"
+	. "<script src='lmq-modal.js?" . filemtime( __DIR__ . '/lmq-modal.js' ) . "' defer></script>\n" );

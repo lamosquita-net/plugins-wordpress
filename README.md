@@ -16,7 +16,7 @@ función se instala sólo donde hace falta y se corrige en un sitio.
 |---|---|
 | [`lamosquita-cookies`](lamosquita-cookies/) | Aviso de cookies y consentimiento, con bloqueo previo de terceros y modo de consentimiento v2 de Google. Funciona también fuera de WordPress. |
 | [`lamosquita-slider`](lamosquita-slider/) | Sliders ligeros sin jQuery: un formato de imagen por dispositivo, foco por imagen, programación por fechas y título con su tipografía. Preparado para WPML. |
-| [`lamosquita-lightbox`](lamosquita-lightbox/) | Visor de fotos sin jQuery: se desliza con el dedo, zoom pellizcando, fotos de hasta 2048 px en vez del original. Abre los enlaces a fotos sin tocar el theme. |
+| [`lamosquita-lightbox`](lamosquita-lightbox/) | Visor de fotos sin jQuery: se desliza con el dedo, zoom pellizcando, fotos de hasta 2048 px en vez del original, con título y descripción. Y páginas en ventana, sólo con su contenido. Sin tocar el theme. |
 
 ## Cómo están hechos
 

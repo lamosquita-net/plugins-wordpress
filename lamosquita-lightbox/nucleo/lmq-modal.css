@@ -1,0 +1,98 @@
+/* =================================================================
+   lamosquita-lightbox · páginas en ventana · aspecto
+   -----------------------------------------------------------------
+   AJUSTES: las variables de abajo, cambiables por web desde el CSS del
+   theme. El ancho máximo se elige en Ajustes › Visor y ventanas.
+   ================================================================= */
+
+.lmq-modal {
+    /* ── AJUSTES ─────────────────────────────────────────────── */
+    --lmq-modal-fondo:   rgb(0 0 0 / .6);   /* lo que queda detrás */
+    --lmq-modal-caja:    #fff;
+    --lmq-modal-margen:  24px;              /* de la ventana al borde de la pantalla */
+    --lmq-modal-radio:   6px;
+    --lmq-modal-cerrar:  #222;              /* la × */
+    /* ── fin de AJUSTES ──────────────────────────────────────── */
+}
+
+.lmq-modal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: var(--lmq-modal-margen);
+    border: 0;
+    box-sizing: border-box;
+    background: var(--lmq-modal-fondo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.lmq-modal:not([open]) { display: none; }
+.lmq-modal::backdrop { background: transparent; }
+
+.lmq-modal__caja {
+    position: relative;
+    width: 100%;
+    max-width: var(--lmq-modal-ancho, 800px);
+    max-height: 100%;
+    display: flex;
+    background: var(--lmq-modal-caja);
+    border-radius: var(--lmq-modal-radio);
+    overflow: hidden;
+}
+.lmq-modal__marco {
+    display: block;
+    width: 100%;
+    height: 240px;            /* hasta que se sabe el de su contenido */
+    max-height: calc(100vh - 2 * var(--lmq-modal-margen));
+    max-height: calc(100dvh - 2 * var(--lmq-modal-margen));
+    border: 0;
+    background: transparent;
+}
+.lmq-modal__caja.es-cargando .lmq-modal__marco { visibility: hidden; }
+.lmq-modal__caja.es-cargando::after {
+    content: "";
+    position: absolute;
+    top: calc(50% - 14px);
+    left: calc(50% - 14px);
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgb(0 0 0 / .15);
+    border-top-color: rgb(0 0 0 / .5);
+    border-radius: 50%;
+    animation: lmq-modal-gira .8s linear infinite;
+}
+@keyframes lmq-modal-gira { to { transform: rotate(360deg); } }
+
+.lmq-modal__cerrar {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--lmq-modal-cerrar);
+    font: 300 30px/1 system-ui, sans-serif;
+    cursor: pointer;
+    opacity: .7;
+}
+.lmq-modal__cerrar:hover, .lmq-modal__cerrar:focus-visible { opacity: 1; }
+
+/* En el móvil, toda la pantalla */
+@media (max-width: 599px) {
+    .lmq-modal { padding: 0; }
+    .lmq-modal__caja { max-width: none; height: 100%; border-radius: 0; }
+    .lmq-modal__marco { height: 100% !important; max-height: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lmq-modal__caja.es-cargando::after { animation-duration: 3s; }
+}

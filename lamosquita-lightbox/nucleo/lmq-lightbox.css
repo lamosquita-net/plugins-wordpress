@@ -13,6 +13,17 @@
     --lmq-lb-margen:   20px;                /* de la foto al borde */
     --lmq-lb-duracion: .3s;                 /* al pasar de foto */
     --lmq-lb-boton:    48px;                /* zona que se puede tocar */
+    /* el pie */
+    --lmq-lb-pie-color:  #f2f2f2;           /* título */
+    --lmq-lb-pie-suave:  #b5b5b5;           /* descripción */
+    --lmq-lb-pie-datos:  #8a8a8a;           /* datos de la toma */
+    --lmq-lb-pie-alto:   33vh;              /* como mucho; si no cabe, se desplaza */
+    /* el paspartú (Ajustes › Visor y ventanas › «en un paspartú blanco») */
+    --lmq-lb-paspartu:        #fff;
+    --lmq-lb-paspartu-borde:  14px;
+    --lmq-lb-paspartu-color:  #222;
+    --lmq-lb-paspartu-suave:  #555;
+    --lmq-lb-paspartu-datos:  #888;
     /* ── fin de AJUSTES ──────────────────────────────────────── */
 }
 
@@ -57,12 +68,18 @@
 }
 .lmq-lb__foto:nth-child(1) { transform: translateX(-100%); }
 .lmq-lb__foto:nth-child(3) { transform: translateX(100%); }
+/* Foto y pie juntos; el JS da a la foto el tamaño para que quepan los dos */
+.lmq-lb__marco {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+}
 .lmq-lb__foto img {
     display: block;
     max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
     object-fit: contain;
     opacity: 0;
     transition: opacity .2s;
@@ -104,18 +121,33 @@
     opacity: .8;
     font-variant-numeric: tabular-nums;
 }
+/* --- El pie, debajo de la foto y de su mismo ancho ---------------- */
 .lmq-lb__pie {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0;
-    padding: 12px var(--lmq-lb-boton);
-    text-align: center;
-    text-shadow: 0 1px 4px rgb(0 0 0 / .8);
-    pointer-events: none;
+    width: 0;
+    min-width: 100%;          /* tan ancho como la foto, ni más */
+    box-sizing: border-box;
+    max-height: var(--lmq-lb-pie-alto);
+    flex-shrink: 0;           /* el sitio se lo quita la foto, no el pie */
+    overflow: auto;
+    padding-top: 10px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--lmq-lb-pie-color);
+    -webkit-user-select: text;
+    user-select: text;
 }
 .lmq-lb__pie:empty { display: none; }
+.lmq-lb__titulo      { display: block; font-weight: 600; }
+.lmq-lb__descripcion { display: block; color: var(--lmq-lb-pie-suave); font-size: 13px; white-space: pre-line; }
+.lmq-lb__datos       { display: block; color: var(--lmq-lb-pie-datos); font-size: 12px; margin-top: 2px; }
+
+/* Paspartú: foto y pie en un recuadro blanco */
+.lmq-lb--paspartu .lmq-lb__marco { background: var(--lmq-lb-paspartu); padding: var(--lmq-lb-paspartu-borde); }
+.lmq-lb--paspartu .lmq-lb__pie { color: var(--lmq-lb-paspartu-color); }
+.lmq-lb--paspartu .lmq-lb__descripcion { color: var(--lmq-lb-paspartu-suave); }
+.lmq-lb--paspartu .lmq-lb__datos { color: var(--lmq-lb-paspartu-datos); }
+.lmq-lb--paspartu.es-zoom .lmq-lb__foto:nth-child(2) .lmq-lb__marco { background: transparent; }
+
 /* Con zoom, sólo la foto y el botón de cerrar */
 .lmq-lb.es-zoom .lmq-lb__pie,
 .lmq-lb.es-zoom .lmq-lb__anterior,

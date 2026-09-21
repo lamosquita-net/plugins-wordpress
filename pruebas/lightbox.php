@@ -100,6 +100,38 @@ comprueba( 'lo demás, intacto', str_replace( array( 'autorretrato.jpg"', 'a%20b
 comprueba( 'anotar dos veces no duplica', $html2, lmq_lightbox_anotar( $html2, $mapa ) );
 comprueba( 'la excluida no se anota aunque esté en el mapa', false, strpos( lmq_lightbox_anotar( $html, array( 'https://web.test/wp-content/uploads/no.jpg' => $mapa['https://web.test/wp-content/uploads/autorretrato.jpg'] ) ), 'no.jpg" data-lmq' ) );
 
+echo "\n=== el pie de foto ===\n";
+$exif = '{"Make":"NIKON CORPORATION","Model":"NIKON D90","DateTimeOriginal":"2012:08:17 10:02:15","ExposureProgram":"Aperture Priority","ExposureTime":"10/1250","FNumber":5.6,"ISOSpeedRatings":100,"FocalLength":"18mm","MeteringMode":"Pattern","FileName":"x.jpg","FileSize":421024,"Software":"Capture One 6 Macintosh","XResolution":"72/1","title":null}';
+comprueba( 'EXIF en JSON → una línea con lo que importa', 'NIKON D90 · 18 mm · f/5.6 · 1/125 s · ISO 100 · 17/08/2012', lmq_lightbox_datos_exif( $exif ) );
+comprueba( 'marca que no se repite en el modelo: van las dos', 'Canon EOS 5D · 2 s', lmq_lightbox_datos_exif( '{"Make":"Canon","Model":"EOS 5D","ExposureTime":"2/1"}' ) );
+comprueba( 'un texto normal no es EXIF', '', lmq_lightbox_datos_exif( 'Rolleiflex sl66' ) );
+comprueba( 'un JSON cualquiera tampoco', '', lmq_lightbox_datos_exif( '{"a":1}' ) );
+
+$p = lmq_lightbox_pie( 'brachypelma smithi', "Rolleiflex sl66\r\nplanar 80mm f2.8  \n kodak tri-x 400", '2012/08/brachypelma.jpg' );
+comprueba( 'título propio: se enseña', 'brachypelma smithi', $p['titulo'] );
+comprueba( 'descripción con sus saltos de línea, limpios', "Rolleiflex sl66\nplanar 80mm f2.8\nkodak tri-x 400", $p['descripcion'] );
+$p = lmq_lightbox_pie( 'underwater_DSC0321_18 mm', $exif, 'underwater_DSC0321_18-mm-scaled.jpg' );
+comprueba( 'descripción EXIF: va a «datos», no a la descripción', array( '', 'NIKON D90 · 18 mm · f/5.6 · 1/125 s · ISO 100 · 17/08/2012' ), array( $p['descripcion'], $p['datos'] ) );
+comprueba( 'título igual que el nombre del fichero: fuera', '', $p['titulo'] );
+comprueba( 'título de la cámara (IMG_1165-Exposure): fuera', '', lmq_lightbox_pie( 'IMG_1165-Exposure', '', 'x.jpg' )['titulo'] );
+comprueba( '(_DSC1337-): fuera', '', lmq_lightbox_pie( '_DSC1337-', '', 'x.jpg' )['titulo'] );
+comprueba( 'marcadores sin rellenar (#image_title): fuera', array( '', '' ), array_values( array_slice( lmq_lightbox_pie( '#image_title', '#image_title', 'x.jpg' ), 0, 2 ) ) );
+comprueba( 'etiquetas HTML y entidades, fuera', array( 'Tapas & vinos', 'la barra' ), array_values( array_slice( lmq_lightbox_pie( 'Tapas &amp; vinos', '<p>la <b>barra</b></p>', 'x.jpg' ), 0, 2 ) ) );
+comprueba( 'un título que empieza por «img» pero es una palabra, se queda', 'Imágenes del viaje', lmq_lightbox_pie( 'Imágenes del viaje', '', 'x.jpg' )['titulo'] );
+
+$mapa_pie = array( 'https://web.test/wp-content/uploads/autorretrato.jpg' => $mapa['https://web.test/wp-content/uploads/autorretrato.jpg'] + array( 'titulo' => 'Autorretrato "F3"', 'descripcion' => "línea 1\nlínea 2", 'datos' => '' ) );
+$con_pie = lmq_lightbox_anotar( $html, $mapa_pie );
+comprueba( 'el pie va al enlace, escapado', 1, substr_count( $con_pie, 'data-lmq-titulo="Autorretrato &quot;F3&quot;" data-lmq-descripcion="línea 1' ) );
+comprueba( 'lo vacío no se escribe', false, strpos( $con_pie, 'data-lmq-datos' ) );
+
+echo "\n=== enlaces que se abren en ventana ===\n";
+$pag = '<nav><a href="https://web.test/">inicio</a><a href="https://web.test/contacto/">contacto</a></nav>';
+comprueba( 'enlace a una página elegida (con o sin barra final)', true, lmq_lightbox_hay_modales( $pag, array( 'https://web.test/contacto' ) ) );
+comprueba( 'con otra ruta, no', false, lmq_lightbox_hay_modales( $pag, array( 'https://web.test/aviso-legal/' ) ) );
+comprueba( 'ruta sin dominio también cuenta', true, lmq_lightbox_hay_modales( '<a href="/aviso-legal/?x=1">aviso</a>', array( 'https://web.test/aviso-legal/' ) ) );
+comprueba( 'la clase lmq-modal, sin páginas elegidas', true, lmq_lightbox_hay_modales( '<a class="boton lmq-modal" href="/cualquiera/">x</a>', array() ) );
+comprueba( 'una clase parecida no', false, lmq_lightbox_hay_modales( '<a class="lmq-modales" href="/x/">x</a>', array() ) );
+
 echo "\n=== CSS y JS al final ===\n";
 comprueba( 'antes del último </body>', '<p>x</p>[R]</body></html>', lmq_lightbox_con_recursos( '<p>x</p></body></html>', '[R]' ) );
 comprueba( 'sin </body>, no toca nada', '{"a":1}', lmq_lightbox_con_recursos( '{"a":1}', '[R]' ) );

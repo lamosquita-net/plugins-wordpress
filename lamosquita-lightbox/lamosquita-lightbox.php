@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       lamosquita-lightbox
  * Plugin URI:        https://www.lamosquita.net/
- * Description:       Visor de fotos ligero, sin jQuery: abre los enlaces a fotos (rel="lightbox", galerías y enlaces sueltos) sin tocar el theme. Deslizar con el dedo, zoom pellizcando o con doble toque, y fotos de hasta 2048 px en vez del original.
- * Version:           0.1.0
+ * Description:       Visor de fotos ligero, sin jQuery: abre los enlaces a fotos (rel="lightbox", galerías y enlaces sueltos) sin tocar el theme, con título y descripción. Deslizar con el dedo, zoom pellizcando o con doble toque, y fotos de hasta 2048 px en vez del original. Y páginas en ventana: sólo su contenido, con todo lo que necesite.
+ * Version:           0.2.0
  * Update URI:        https://plugins.lamosquita.net/lamosquita-lightbox
  * Requires at least: 6.3
  * Tested up to:      7.1.1
@@ -17,13 +17,16 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-const LMQ_LIGHTBOX_VERSION = '0.1.0';
+const LMQ_LIGHTBOX_VERSION = '0.2.0';
 
 define( 'LMQ_LIGHTBOX_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LMQ_LIGHTBOX_URL', plugin_dir_url( __FILE__ ) );
 
 // ═══════════════════════════════════════════════════════════════════
 //  AJUSTES
+//  Lo que es igual en todas las webs. Lo que cambia de una a otra (estilo
+//  del pie, qué textos salen, páginas en ventana) está en el escritorio,
+//  Ajustes › Visor y ventanas, para que las actualizaciones no lo pisen.
 // ═══════════════════════════════════════════════════════════════════
 
 /** Lado mayor, en px, de la foto que se abre. Se usa la versión más
@@ -34,11 +37,8 @@ const LMQ_LIGHTBOX_LADO_MAX = 2048;
 /** Al llegar a la última foto, ¿seguir por la primera? */
 const LMQ_LIGHTBOX_CICLICO = false;
 
-/** Pie de foto: el de la galería (figcaption), si no el alt de la
- *  miniatura, si no el title del enlace. false: sin pie. */
-const LMQ_LIGHTBOX_PIE = true;
-
-/* Colores, márgenes y velocidad: en el bloque AJUSTES de nucleo/lmq-lightbox.css. */
+/* Colores, márgenes, paspartú y velocidad: en el bloque AJUSTES de
+   nucleo/lmq-lightbox.css; los de la ventana, en nucleo/lmq-modal.css. */
 
 // ═══════════════════════════════════════════════════════════════════
 //  fin de AJUSTES
@@ -53,4 +53,5 @@ new $lmq_lightbox_actualizador(
 );
 
 require_once LMQ_LIGHTBOX_DIR . 'nucleo/enlaces.php';
+require_once LMQ_LIGHTBOX_DIR . 'wordpress/ajustes.php';
 require_once LMQ_LIGHTBOX_DIR . 'wordpress/web.php';

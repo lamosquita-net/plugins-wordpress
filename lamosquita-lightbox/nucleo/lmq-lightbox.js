@@ -10,6 +10,8 @@
      doble toque para el zoom y, con zoom, arrastrar para moverse. Con
      ratón: flechas, rueda para el zoom y doble clic. Teclado: ← → y Esc.
    - El botón «atrás» del móvil cierra el visor en vez de salir de la página.
+   - Pie debajo de la foto: título, descripción y datos de la toma (los
+     escribe el servidor en data-lmq-*); sobre el fondo o en un paspartú.
    ================================================================= */
 (function () {
   'use strict';
@@ -27,7 +29,7 @@
   var FOTO = /\.(jpe?g|png|webp|avif|gif)(?:[?#]|$)/i;
   var REL_NO = /^(noopener|noreferrer|nofollow|external|ugc|sponsored|me|author|bookmark|tag)$/i;
 
-  var capa, pista, paneles, contador, pie, bAnterior, bSiguiente;
+  var capa, pista, paneles, contador, bAnterior, bSiguiente;
   var fotos = [], actual = 0, origen = null, abierto = false, animando = false, terminar = null;
   var z = { s: 1, x: 0, y: 0 };           // zoom de la foto actual
   var punteros = {}, gesto = null, toque = null;
@@ -40,13 +42,18 @@
   }
 
   function foto(a) {
-    return {
+    var f = {
       src: a.getAttribute('data-lmq-src') || a.href,
       srcset: a.getAttribute('data-lmq-srcset') || '',
       ancho: +a.getAttribute('data-lmq-ancho') || 0,
       alto: +a.getAttribute('data-lmq-alto') || 0,
-      pie: pieDe(a)
+      titulo: a.getAttribute('data-lmq-titulo') || '',
+      descripcion: a.getAttribute('data-lmq-descripcion') || '',
+      datos: a.getAttribute('data-lmq-datos') || ''
     };
+    // Fotos de fuera de la biblioteca: el pie de la galería, el alt o el title.
+    if (!a.hasAttribute('data-lmq-src')) f.titulo = pieDe(a);
+    return f;
   }
 
   function pieDe(a) {
@@ -112,22 +119,24 @@
     capa = el('dialog', 'lmq-lb');
     capa.setAttribute('aria-label', T.visor || 'Visor de fotos');
     pista = el('div', 'lmq-lb__pista');
+    if (C.estilo === 'paspartu') capa.classList.add('lmq-lb--paspartu');
     paneles = [0, 1, 2].map(function () {
       var p = el('figure', 'lmq-lb__foto');
+      var marco = el('div', 'lmq-lb__marco');
       var img = el('img');
       img.decoding = 'async';
       img.draggable = false;
-      img.addEventListener('load', function () { img.classList.add('es-cargada'); });
+      img.addEventListener('load', function () { img.classList.add('es-cargada'); encajar(p); });
       img.addEventListener('error', function () { img.classList.add('es-cargada'); });
-      p.appendChild(img);
+      marco.append(img, el('figcaption', 'lmq-lb__pie'));
+      p.appendChild(marco);
       pista.appendChild(p);
       return p;
     });
     contador = el('span', 'lmq-lb__contador');
-    pie = el('p', 'lmq-lb__pie');
     bAnterior = boton('lmq-lb__anterior', '‹', T.anterior || 'Foto anterior', function () { ir(-1); });
     bSiguiente = boton('lmq-lb__siguiente', '›', T.siguiente || 'Foto siguiente', function () { ir(1); });
-    capa.append(pista, contador, pie, bAnterior, bSiguiente,
+    capa.append(pista, contador, bAnterior, bSiguiente,
       boton('lmq-lb__cerrar', '×', T.cerrar || 'Cerrar', cerrar));
     document.body.appendChild(capa);
 
@@ -141,7 +150,7 @@
     pista.addEventListener('pointerup', arriba);
     pista.addEventListener('pointercancel', arriba);
     pista.addEventListener('wheel', rueda, { passive: false });
-    window.addEventListener('resize', function () { if (abierto) quitarZoom(false); });
+    window.addEventListener('resize', function () { if (abierto) { quitarZoom(false); paneles.forEach(encajar); } });
     window.addEventListener('popstate', function () { if (abierto) cerrarYa(); });
   }
 
@@ -151,19 +160,53 @@
     return -1;
   }
 
+  function imgDe(p) { return p.firstChild.firstChild; }
+
+  /** El pie: título, descripción (con sus saltos de línea) y datos de la toma. */
+  function pintarPie(caja, f) {
+    caja.textContent = '';
+    if (f.titulo) caja.appendChild(el('strong', 'lmq-lb__titulo', f.titulo));
+    if (f.descripcion) caja.appendChild(el('span', 'lmq-lb__descripcion', f.descripcion));
+    if (f.datos) caja.appendChild(el('span', 'lmq-lb__datos', f.datos));
+  }
+
+  /** Tamaño de la foto para que ella, su pie y el paspartú quepan en la pantalla. */
+  function encajar(p) {
+    var img = imgDe(p), f = fotos[+p.getAttribute('data-i')];
+    if (!f || img.hidden) return;
+    var nw = f.ancho || img.naturalWidth, nh = f.alto || img.naturalHeight;
+    if (!nw || !nh) return;   // sin medidas hasta que cargue
+    var cs = getComputedStyle(p), ms = getComputedStyle(p.firstChild);
+    var borde = parseFloat(ms.paddingLeft) + parseFloat(ms.paddingRight);
+    var anchoLibre = p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - borde;
+    var altoLibre = p.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - parseFloat(ms.paddingTop) - parseFloat(ms.paddingBottom);
+    var pie = p.firstChild.lastChild, w = 0, h = 0;
+    for (var vuelta = 0; vuelta < 2; vuelta++) {   // el alto del pie depende del ancho de la foto
+      // El pie ocupa lo que pide su texto, hasta su tope (33vh): lo que no quepa, se desplaza.
+      var altoPie = pie.childNodes.length ? Math.min(pie.scrollHeight, parseFloat(getComputedStyle(pie).maxHeight) || Infinity) : 0;
+      var escala = Math.min(1, anchoLibre / nw, Math.max(40, altoLibre - altoPie) / nh);
+      w = Math.floor(nw * escala); h = Math.floor(nh * escala);
+      img.style.width = w + 'px';
+      img.style.height = h + 'px';
+    }
+  }
+
   function pintarPanel(p, i) {
-    var img = p.firstChild, f = fotos[i];
-    if (!f) { p.removeAttribute('data-src'); img.removeAttribute('srcset'); img.removeAttribute('src'); img.hidden = true; return; }
+    var img = imgDe(p), f = fotos[i];
+    p.setAttribute('data-i', i);
+    if (!f) { p.removeAttribute('data-src'); img.removeAttribute('srcset'); img.removeAttribute('src'); img.hidden = true; pintarPie(p.firstChild.lastChild, {}); return; }
     img.hidden = false;
-    if (p.getAttribute('data-src') === f.src) return;   // ya estaba (al pasar se reaprovecha)
+    if (p.getAttribute('data-src') === f.src) { encajar(p); return; }   // ya estaba (al pasar se reaprovecha)
     p.setAttribute('data-src', f.src);
+    pintarPie(p.firstChild.lastChild, f);
     img.classList.remove('es-cargada');
-    img.alt = f.pie;
+    img.alt = f.titulo || f.descripcion;
     if (f.ancho) { img.width = f.ancho; img.height = f.alto; } else { img.removeAttribute('width'); img.removeAttribute('height'); }
     img.sizes = '100vw';
     if (f.srcset) img.srcset = f.srcset; else img.removeAttribute('srcset');
     img.src = f.src;
     if (img.complete && img.naturalWidth) img.classList.add('es-cargada');
+    encajar(p);
   }
 
   function pintar() {
@@ -172,7 +215,6 @@
     pintarPanel(paneles[2], indice(actual + 1));
     var varias = fotos.length > 1;
     contador.textContent = varias ? (actual + 1) + ' / ' + fotos.length : '';
-    pie.textContent = fotos[actual].pie;
     bAnterior.hidden = bSiguiente.hidden = !varias;
     bAnterior.disabled = indice(actual - 1) < 0;
     bSiguiente.disabled = indice(actual + 1) < 0;
@@ -184,8 +226,8 @@
     fotos = lista; actual = i; origen = desde;
     quitarZoom(false);
     pista.style.transform = '';
-    pintar();
     capa.showModal();
+    pintar();   // ya abierta: para encajar hacen falta las medidas de la pantalla
     abierto = true;
     document.documentElement.style.overflow = 'hidden';
     history.pushState({ lmqLb: true }, '');
@@ -248,7 +290,7 @@
 
   // ─── Zoom ────────────────────────────────────────────────────────
 
-  function imgActual() { return paneles[1].firstChild; }
+  function imgActual() { return imgDe(paneles[1]); }
 
   function aplicarZoom(animar) {
     var img = imgActual();
@@ -273,8 +315,9 @@
 
   /** Zoom a s, dejando quieto el punto de la foto que estaba en (px, py). */
   function zoomEn(s, px, py, deS, deX, deY, aX, aY) {
-    var r = paneles[1].getBoundingClientRect();
-    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    // El centro de la foto sin zoom (con el pie debajo, no es el de la pantalla).
+    var r = imgActual().getBoundingClientRect();
+    var cx = r.left + r.width / 2 - z.x, cy = r.top + r.height / 2 - z.y;
     s = Math.min(ZOOM_MAX, Math.max(1, s));
     var qx = (px - cx - deX) / deS, qy = (py - cy - deY) / deS;
     z.s = s;
@@ -361,7 +404,12 @@
   var ultimo = null;
   function tocar(t) {
     var enFoto = t.en === imgActual();
-    if (!enFoto) { ultimo = null; cerrar(); return; }   // tocar fuera de la foto: cerrar
+    if (!enFoto) {
+      ultimo = null;
+      // Tocar el fondo cierra; el pie o el paspartú, no (se puede estar leyendo).
+      if (t.en === pista || (t.en.classList && t.en.classList.contains('lmq-lb__foto'))) cerrar();
+      return;
+    }
     if (ultimo && Date.now() - ultimo.t < 300 && Math.hypot(t.x - ultimo.x, t.y - ultimo.y) < 30) {
       if (z.s > 1) quitarZoom(true);
       else { zoomEn(ZOOM_DOBLE, t.x, t.y, 1, 0, 0); aplicarZoom(true); }

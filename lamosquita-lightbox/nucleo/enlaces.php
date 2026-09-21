@@ -181,8 +181,136 @@ function lmq_lightbox_anotar( $html, array $mapa ) {
 		$datos = ' data-lmq-src="' . $e( $v['src'] ) . '"'
 			. ( '' !== $v['srcset'] ? ' data-lmq-srcset="' . $e( $v['srcset'] ) . '"' : '' )
 			. ' data-lmq-ancho="' . (int) $v['ancho'] . '" data-lmq-alto="' . (int) $v['alto'] . '"';
+		foreach ( array( 'titulo', 'descripcion', 'datos' ) as $campo ) {   // el pie, si lo hay
+			if ( ! empty( $v[ $campo ] ) ) {
+				$datos .= ' data-lmq-' . $campo . '="' . $e( $v[ $campo ] ) . '"';
+			}
+		}
 		return substr( $etiqueta, 0, -1 ) . $datos . '>';
 	}, $html );
+}
+
+// ─── El pie de foto ──────────────────────────────────────────────
+
+/** ¿Es un texto que no dice nada? Vacío, o un marcador sin rellenar
+ *  («#image_title»). */
+function lmq_lightbox_vacio( $t ) {
+	$t = trim( (string) $t );
+	return '' === $t || (bool) preg_match( '/^#[a-z_]+$/i', $t );
+}
+
+/** ¿El título es el nombre del fichero, o el que pone la cámara
+ *  (IMG_1165, _DSC1337, DSCN…)? Entonces no se enseña. */
+function lmq_lightbox_titulo_de_fichero( $titulo, $fichero ) {
+	$normal = function ( $s ) {
+		return trim( preg_replace( '/[\s_.-]+/', ' ', strtolower( (string) $s ) ) );
+	};
+	$base = pathinfo( preg_replace( '/(-scaled|-\d+x\d+)+(\.[a-z0-9]+)$/i', '$2', (string) $fichero ), PATHINFO_FILENAME );
+	if ( $normal( $titulo ) === $normal( $base ) ) {
+		return true;
+	}
+	return (bool) preg_match( '/^_?(img|dsc[nf]?|pict|p|pxl|mvimg|photo|image|dji|gopr)[\s_-]?\d{3,}/i', trim( (string) $titulo ) );
+}
+
+/**
+ * Los datos de la toma, en una línea, a partir del EXIF guardado como JSON
+ * en la descripción: cámara · focal · diafragma · velocidad · ISO · fecha.
+ * '' si la descripción no es ese JSON.
+ */
+function lmq_lightbox_datos_exif( $descripcion ) {
+	$j = json_decode( trim( (string) $descripcion ), true );
+	if ( ! is_array( $j ) || ( empty( $j['Model'] ) && empty( $j['ExposureTime'] ) && empty( $j['FNumber'] ) ) ) {
+		return '';
+	}
+	$partes = array();
+	$marca  = trim( (string) ( $j['Make'] ?? '' ) );
+	$modelo = trim( (string) ( $j['Model'] ?? '' ) );
+	if ( '' !== $modelo ) {
+		// «NIKON CORPORATION» + «NIKON D90» → «NIKON D90»
+		$primera = strtok( $marca, ' ' );
+		$partes[] = ( '' === $marca || ( $primera && 0 === stripos( $modelo, $primera ) ) ) ? $modelo : $marca . ' ' . $modelo;
+	}
+	if ( ! empty( $j['FocalLength'] ) && preg_match( '/^([\d.]+)(?:\/(\d+))?/', (string) $j['FocalLength'], $m ) ) {
+		$partes[] = round( $m[1] / ( empty( $m[2] ) ? 1 : $m[2] ), 1 ) . ' mm';
+	}
+	if ( ! empty( $j['FNumber'] ) && preg_match( '/^([\d.]+)(?:\/(\d+))?/', (string) $j['FNumber'], $m ) ) {
+		$partes[] = 'f/' . round( $m[1] / ( empty( $m[2] ) ? 1 : $m[2] ), 1 );
+	}
+	if ( ! empty( $j['ExposureTime'] ) && preg_match( '/^([\d.]+)(?:\/([\d.]+))?$/', (string) $j['ExposureTime'], $m ) ) {
+		$seg = $m[1] / ( empty( $m[2] ) ? 1 : $m[2] );
+		if ( $seg > 0 ) {
+			$partes[] = $seg >= 1 ? round( $seg, 1 ) . ' s' : '1/' . round( 1 / $seg ) . ' s';
+		}
+	}
+	if ( ! empty( $j['ISOSpeedRatings'] ) ) {
+		$partes[] = 'ISO ' . ( is_array( $j['ISOSpeedRatings'] ) ? reset( $j['ISOSpeedRatings'] ) : $j['ISOSpeedRatings'] );
+	}
+	if ( ! empty( $j['DateTimeOriginal'] ) && preg_match( '/^(\d{4})[:-](\d{2})[:-](\d{2})/', (string) $j['DateTimeOriginal'], $m ) ) {
+		$partes[] = "$m[3]/$m[2]/$m[1]";
+	}
+	return implode( ' · ', $partes );
+}
+
+/**
+ * El pie de una foto de la biblioteca: título, descripción y datos de la
+ * toma, ya limpios. Los que no dicen nada, vacíos.
+ */
+function lmq_lightbox_pie( $titulo, $descripcion, $fichero ) {
+	$titulo = trim( html_entity_decode( strip_tags( (string) $titulo ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+	if ( lmq_lightbox_vacio( $titulo ) || lmq_lightbox_titulo_de_fichero( $titulo, $fichero ) ) {
+		$titulo = '';
+	}
+	$datos = lmq_lightbox_datos_exif( $descripcion );
+	$desc  = '';
+	if ( '' === $datos ) {
+		$desc = trim( preg_replace( "/[ \t]*\r?\n[ \t]*/", "\n", html_entity_decode( strip_tags( (string) $descripcion ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+		if ( lmq_lightbox_vacio( $desc ) ) {
+			$desc = '';
+		}
+	}
+	return array( 'titulo' => $titulo, 'descripcion' => $desc, 'datos' => $datos );
+}
+
+// ─── Páginas en ventana ─────────────────────────────────────────────
+
+/** Una URL reducida a anfitrión + ruta, sin barra final, para compararlas. */
+function lmq_lightbox_url_normal( $url ) {
+	$p = parse_url( (string) $url );
+	if ( ! $p || empty( $p['path'] ) && empty( $p['host'] ) ) {
+		return '';
+	}
+	return strtolower( $p['host'] ?? '' ) . rtrim( $p['path'] ?? '/', '/' );
+}
+
+/**
+ * ¿La página tiene algún enlace que se abre en ventana? Los que llevan la
+ * clase lmq-modal y los que van a una de las páginas elegidas en los ajustes.
+ */
+function lmq_lightbox_hay_modales( $html, array $urls ) {
+	if ( preg_match( '/<a\s[^>]*class\s*=\s*["\'][^"\']*\blmq-modal\b/i', (string) $html ) ) {
+		return true;
+	}
+	if ( ! $urls ) {
+		return false;
+	}
+	$buscadas = array_flip( array_filter( array_map( 'lmq_lightbox_url_normal', $urls ) ) );
+	$rutas    = array();   // para los enlaces sin dominio («/contacto/»)
+	foreach ( $urls as $u ) {
+		$rutas[ rtrim( (string) parse_url( $u, PHP_URL_PATH ), '/' ) ] = true;
+	}
+	unset( $rutas[''] );   // la portada no: casaría con cualquier «#» o «?x»
+	preg_match_all( '/<a\s[^>]*>/i', (string) $html, $m );
+	foreach ( $m[0] as $etiqueta ) {
+		$href = lmq_lightbox_atributo( $etiqueta, 'href' );
+		if ( null === $href ) {
+			continue;
+		}
+		$sin_dominio = null === parse_url( $href, PHP_URL_HOST );
+		if ( $sin_dominio ? isset( $rutas[ rtrim( (string) parse_url( $href, PHP_URL_PATH ), '/' ) ] ) : isset( $buscadas[ lmq_lightbox_url_normal( $href ) ] ) ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /** Mete el CSS y el JS justo antes del último </body>. */
