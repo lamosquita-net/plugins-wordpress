@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.4.2 · 21/09/2026. Cambios en §11.
+Versión 0.4.3 · 21/09/2026. Cambios en §11.
 
 ---
 
@@ -289,6 +289,23 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.3** · 21/09/2026
+
+- **El interruptor de actualizaciones automáticas y «Ver detalles» salen nada
+  más activar**, sin esperar. WordPress guarda su última comprobación de
+  actualizaciones y no la repite en 1 h (entrando en Plugins) o 12 h (por su
+  cuenta). Si esa comprobación se hizo con el plugin recién subido pero aún
+  sin activar, o durante la propia actualización con el código viejo cargado,
+  el plugin se quedaba fuera de la lista de «al día» hasta la siguiente.
+- Ahora el actualizador apunta qué versión vio por última vez. En cuanto un
+  administrador carga el escritorio con una versión distinta (instalación,
+  activación, subida por FTP o actualización), tira la comprobación guardada y
+  WordPress la repite en esa misma carga, ya con nuestro filtro. Nunca en
+  `admin-ajax.php`, que también lo llaman los visitantes.
+- Como siempre con el actualizador, esto funciona a partir de tener la 0.4.3
+  instalada: la propia 0.4.3 ya se beneficia en la primera carga del
+  escritorio tras instalarla.
 
 **0.4.2** · 21/09/2026
 

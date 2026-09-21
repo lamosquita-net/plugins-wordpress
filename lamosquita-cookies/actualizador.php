@@ -33,6 +33,11 @@
  *  - La ventana «Ver detalles», con la descripción y los cambios. Sin
  *    esto, WordPress iría a buscarla a wordpress.org por el nombre de la
  *    carpeta, y saldría un error o, peor, la ficha de otro plugin.
+ *  - Que todo eso aparezca NADA MÁS instalar, activar o actualizar. Si
+ *    WordPress comprobó las actualizaciones cuando el plugin aún no estaba
+ *    activo, no vuelve a comprobar en 1 h o 12 h. En cuanto un
+ *    administrador carga el escritorio con una versión que el actualizador
+ *    no había visto, se tira esa comprobación y se repite en esa misma carga.
  *
  * Si dos plugins nuestros traen este fichero, se define una sola vez (la
  * guarda de class_exists) y cada uno crea su propia instancia. Al tocarlo,
@@ -96,6 +101,33 @@ if ( ! class_exists( 'Lamosquita_Actualizador' ) ) {
 
 			add_filter( "update_plugins_{$anfitrion}", array( $this, 'comprobar' ), 10, 3 );
 			add_filter( 'plugins_api', array( $this, 'detalles' ), 10, 3 );
+			// Prioridad 1: antes que _maybe_update_plugins() de WordPress (10),
+			// para que la comprobación se repita en esta misma carga.
+			add_action( 'admin_init', array( $this, 'version_nueva' ), 1 );
+		}
+
+		/**
+		 * Si la versión instalada no es la última que vio el actualizador
+		 * (instalación, activación, subida por FTP o actualización), tira la
+		 * comprobación guardada de WordPress y nuestra copia, para que se
+		 * vuelva a preguntar ya con este código cargado.
+		 *
+		 * Sólo con un administrador que puede actualizar plugins y nunca en
+		 * admin-ajax.php: lo llaman también los visitantes, y cada vuelta a
+		 * comprobar es una petición a wordpress.org.
+		 */
+		public function version_nueva() {
+			if ( wp_doing_ajax() || ! current_user_can( 'update_plugins' ) ) {
+				return;
+			}
+			$clave   = 'lmq_act_visto_' . md5( $this->plugin );
+			$version = get_file_data( $this->fichero, array( 'v' => 'Version' ) )['v'];
+			if ( get_option( $clave ) === $version ) {
+				return;
+			}
+			update_option( $clave, $version, true );
+			delete_site_transient( 'update_plugins' );
+			delete_transient( 'lmq_act_' . md5( $this->json ) );
 		}
 
 		/**

@@ -48,6 +48,21 @@ function apply_filters( $hook, $valor ) {
 $GLOBALS['accion_actual'] = '';
 function doing_action( $accion ) { return $GLOBALS['accion_actual'] === $accion; }
 
+$GLOBALS['acciones']    = array();   // hook => [[callback, prioridad]]
+$GLOBALS['opciones']    = array();
+$GLOBALS['site_transients'] = array( 'update_plugins' => 'comprobación guardada' );
+$GLOBALS['es_ajax']     = false;
+$GLOBALS['puede']       = true;      // el usuario puede actualizar plugins
+
+function add_action( $hook, $cb, $prioridad = 10, $args = 1 ) { $GLOBALS['acciones'][ $hook ][] = array( $cb, $prioridad ); }
+function do_action( $hook ) { foreach ( $GLOBALS['acciones'][ $hook ] ?? array() as $a ) call_user_func( $a[0] ); }
+function wp_doing_ajax() { return $GLOBALS['es_ajax']; }
+function current_user_can( $cap ) { return $GLOBALS['puede']; }
+function get_option( $clave, $defecto = false ) { return $GLOBALS['opciones'][ $clave ] ?? $defecto; }
+function update_option( $clave, $valor, $autoload = null ) { $GLOBALS['opciones'][ $clave ] = $valor; return true; }
+function delete_site_transient( $clave ) { unset( $GLOBALS['site_transients'][ $clave ] ); return true; }
+function delete_transient( $clave ) { unset( $GLOBALS['transients'][ $clave ] ); return true; }
+
 function get_transient( $clave ) { return $GLOBALS['transients'][ $clave ] ?? false; }
 function set_transient( $clave, $valor, $segundos ) { $GLOBALS['transients'][ $clave ] = $valor; return true; }
 

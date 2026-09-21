@@ -160,12 +160,33 @@ limpia(); respuesta_error();
 comprueba( 'servidor caído → error, no false (si no, WordPress iría a wordpress.org)', true,
 	$a->detalles( false, 'plugin_information', (object) array( 'slug' => $plugin ) ) instanceof WP_Error );
 
+echo "\n=== nada más instalar, activar o actualizar ===\n";
+$prio = null;
+foreach ( $GLOBALS['acciones']['admin_init'] ?? array() as $x ) { if ( $x[0][1] === 'version_nueva' ) $prio = $x[1]; }
+comprueba( 'se engancha a admin_init antes que WordPress (prioridad 1)', 1, $prio );
+$reinicia = function () { $GLOBALS['site_transients'] = array( 'update_plugins' => 'guardada' ); $GLOBALS['transients'] = array( 'lmq_act_x' => 1 ); };
+$GLOBALS['opciones'] = array(); $reinicia(); limpia(); respuesta_json( array( 'version' => '99.0.0' ) ); $a->comprobar( false, $datos, $mio );
+$a->version_nueva();
+comprueba( 'versión que no había visto → tira la comprobación de WordPress', false, isset( $GLOBALS['site_transients']['update_plugins'] ) );
+comprueba( '… y la copia propia del actualizador', 0, count( array_filter( array_keys( $GLOBALS['transients'] ), function ( $k ) { return 0 === strpos( $k, 'lmq_act_' ) && 'lmq_act_x' !== $k; } ) ) );
+comprueba( '… y apunta la versión vista', $cab['version'], $GLOBALS['opciones'][ 'lmq_act_visto_' . md5( $mio ) ] ?? null );
+$reinicia(); $a->version_nueva();
+comprueba( 'la misma versión otra vez → no toca nada', 'guardada', $GLOBALS['site_transients']['update_plugins'] ?? null );
+$GLOBALS['opciones'][ 'lmq_act_visto_' . md5( $mio ) ] = '0.0.1'; $reinicia(); $a->version_nueva();
+comprueba( 'actualizado (o subido por FTP) → vuelve a tirarla', false, isset( $GLOBALS['site_transients']['update_plugins'] ) );
+$GLOBALS['opciones'] = array(); $reinicia(); $GLOBALS['es_ajax'] = true; $a->version_nueva(); $GLOBALS['es_ajax'] = false;
+comprueba( 'en admin-ajax.php (también lo llaman visitantes) → nada', 'guardada', $GLOBALS['site_transients']['update_plugins'] ?? null );
+$reinicia(); $GLOBALS['puede'] = false; $a->version_nueva(); $GLOBALS['puede'] = true;
+comprueba( 'usuario que no puede actualizar plugins → nada', 'guardada', $GLOBALS['site_transients']['update_plugins'] ?? null );
+
 echo "\n=== sin cabecera Update URI no se engancha a nada ===\n";
+$GLOBALS['acciones'] = array();
 $GLOBALS['filtros'] = array();
 $tmp = sys_get_temp_dir() . '/plugin-sin-uri.php';
 file_put_contents( $tmp, "<?php\n/**\n * Plugin Name: sin uri\n * Version: 1.0.0\n */\n" );
 new Lamosquita_Actualizador( $tmp, 'https://ejemplo.net/x.json' );
 comprueba( 'no registra ningún filtro', 0, count( $GLOBALS['filtros'] ) );
+comprueba( 'ni ninguna acción', 0, count( $GLOBALS['acciones'] ) );
 unlink( $tmp );
 
 printf( "\n%d correctas, %d incorrectas\n\n", $ok, $mal );
