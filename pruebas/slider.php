@@ -88,7 +88,8 @@ contiene( 'proporción normalizada', '--lmq-prop-movil:9 / 16', $h );
 contiene( 'proporción que falta → la por defecto', '--lmq-prop-tableta-vertical:3 / 4', $h );
 contiene( 'color del título en minúsculas', '--lmq-titulo-color:#ffffff', $h );
 contiene( 'color propio del slide', '--lmq-titulo-color:#111111', $h );
-contiene( 'posición del título', 'lmq-pos--arriba-derecha', $h );
+contiene( 'posición del slider en escritorio (arriba a la derecha)', '--lmq-pos-v-escritorio:flex-start;--lmq-pos-h-escritorio:flex-end;--lmq-pos-t-escritorio:right', $h );
+contiene( '… y heredada en móvil', '--lmq-pos-v-movil:flex-start;--lmq-pos-h-movil:flex-end;--lmq-pos-t-movil:right', $h );
 contiene( 'el título se escapa', 'Rebajas &lt;b&gt;ya&lt;/b&gt;', $h );
 contiene( 'el nombre se escapa', 'aria-label="Portada &quot;principal&quot;"', $h );
 contiene( 'con URL el slide es un enlace', '<a class="lmq-slide__marco" href="/tienda/">', $h );
@@ -106,6 +107,20 @@ comprueba( 'el slide sin imagen de escritorio no se pinta', 2, substr_count( $h,
 contiene( 'numeración para lectores de pantalla', 'aria-label="2 de 2"', $h );
 contiene( 'medidas para reservar el hueco', 'width="1600" height="900"', $h );
 
+echo "\n=== posición del título: formato → escritorio del slide → slider ===\n";
+$pos = function ( $propias ) { return lmq_slider_posiciones( array( 'posiciones' => $propias ), 'abajo-izquierda' ); };
+comprueba( 'sin nada propio, todo la del slider', array_fill_keys( array_keys( lmq_slider_formatos() ), 'abajo-izquierda' ), $pos( array() ) );
+comprueba( 'la de escritorio del slide pasa a todos los formatos', 'centro', $pos( array( 'escritorio' => 'centro' ) )['movil'] );
+comprueba( 'la del móvil sólo al móvil', array( 'movil' => 'arriba-centro', 'tableta-vertical' => 'centro' ),
+	array_intersect_key( $pos( array( 'escritorio' => 'centro', 'movil' => 'arriba-centro' ) ), array( 'movil' => 1, 'tableta-vertical' => 1 ) ) );
+comprueba( 'una posición inventada se ignora y se hereda', 'abajo-izquierda', $pos( array( 'movil' => 'fuera' ) )['movil'] );
+comprueba( '«centro» es centro en los dos ejes', array( '--lmq-pos-v-movil' => 'center', '--lmq-pos-h-movil' => 'center', '--lmq-pos-t-movil' => 'center' ), lmq_slider_posicion_css( 'movil', 'centro' ) );
+$hp = lmq_slider_html( array( 'titulo' => array( 'posicion' => 'abajo-izquierda' ), 'slides' => array(
+	array( 'titulo' => 'x', 'posiciones' => array( 'movil' => 'arriba-derecha' ), 'imagenes' => array( 'escritorio' => img( '/a.jpg' ) ) ) ) ), array( 'id' => 'p' ) );
+contiene( 'en el HTML: escritorio, la del slider', '--lmq-pos-v-escritorio:flex-end;--lmq-pos-h-escritorio:flex-start', $hp );
+contiene( 'en el HTML: móvil, la suya', '--lmq-pos-v-movil:flex-start;--lmq-pos-h-movil:flex-end;--lmq-pos-t-movil:right', $hp );
+contiene( 'sin título no se pinta la capa del título', 'lmq-slide__texto', lmq_slider_html( array( 'slides' => array( slide( 1, array( 'titulo' => '' ) ) ) ), array( 'id' => 'q' ) ), false );
+
 echo "\n=== lo que no encaja se sustituye por lo seguro ===\n";
 $malo = lmq_slider_html( array(
 	'transicion' => 'explotar', 'tiempo' => 9999,
@@ -118,7 +133,7 @@ contiene( 'tiempo acotado a 60 s', 'data-lmq-tiempo="60000"', $malo );
 contiene( 'color con CSS inyectado → blanco', '--lmq-titulo-color:#ffffff', $malo );
 contiene( 'tamaño con CSS inyectado → por defecto', '--lmq-titulo-tamano:2.5rem', $malo );
 contiene( 'peso no múltiplo de 100 → 700', '--lmq-titulo-peso:700', $malo );
-contiene( 'posición desconocida → abajo a la izquierda', 'lmq-pos--abajo-izquierda', $malo );
+contiene( 'posición desconocida → abajo a la izquierda', '--lmq-pos-v-escritorio:flex-end;--lmq-pos-h-escritorio:flex-start', $malo );
 contiene( 'proporción con cero → 16 / 9', '--lmq-prop-escritorio:16 / 9', $malo );
 contiene( 'foco fuera de rango → centro', '--lmq-foco-escritorio:50% 50%', $malo );
 contiene( 'enlace javascript: → sin enlace', 'javascript:', $malo, false );

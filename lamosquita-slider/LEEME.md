@@ -1,6 +1,6 @@
 # lamosquita-slider
 
-Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.2 · 21/09/2026.
+Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.3 · 21/09/2026.
 
 ---
 
@@ -95,6 +95,19 @@ El del slider tiene un reloj sintético (`?reloj=1`) porque el navegador de
 pruebas frena los temporizadores de las pestañas ocultas.
 
 ## 7 · Cambios
+
+**0.1.3** · 21/09/2026
+
+- **Posición del título por formato.** Cada formato de cada slide tiene su
+  rejilla de 3 × 3 bajo la vista previa. Si no se toca, hereda: el formato toma
+  la posición de escritorio del slide, y escritorio la del slider. La rejilla
+  gris es la heredada; la azul, la propia, con un enlace para volver a heredar.
+- **El título se ve en las vistas previas del editor**, con su posición, color,
+  grosor y cuerpo reducidos a la escala de cada formato (pantalla típica:
+  1280, 1024, 768 y 390 px de ancho). Es orientativo: la tipografía es la del
+  editor, no la del theme.
+- El cuerpo sigue siendo uno para escritorio y tabletas y otro para móvil, y el
+  color, uno por slide.
 
 **0.1.2** · 21/09/2026
 

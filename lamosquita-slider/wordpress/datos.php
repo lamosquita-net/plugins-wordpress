@@ -132,13 +132,22 @@ function lmq_slider_sanear_version( array $v ) {
 				$imgs[ $f ] = array( 'id' => $id, 'foco' => lmq_slider_foco( isset( $i['foco'] ) ? $i['foco'] : '' ) );
 			}
 		}
+		// Posición propia del título por formato; lo que no esté, se hereda.
+		$posiciones = array();
+		foreach ( array_keys( lmq_slider_formatos() ) as $f ) {
+			$p = isset( $s['posiciones'][ $f ] ) ? $s['posiciones'][ $f ] : '';
+			if ( is_string( $p ) && in_array( $p, LMQ_SLIDER_POSICIONES, true ) ) {
+				$posiciones[ $f ] = $p;
+			}
+		}
 		$url = isset( $s['url'] ) ? esc_url_raw( trim( (string) $s['url'] ) ) : '';
 		// esc_url_raw deja pasar rutas sin barra delante y esquemas raros: el núcleo decide.
 		$out['slides'][] = array(
 			'titulo'   => sanitize_text_field( isset( $s['titulo'] ) ? (string) $s['titulo'] : '' ),
 			'url'      => lmq_slider_url( $url ),
-			'color'    => lmq_slider_color( isset( $s['color'] ) ? $s['color'] : '', '' ),
-			'imagenes' => $imgs,
+			'color'      => lmq_slider_color( isset( $s['color'] ) ? $s['color'] : '', '' ),
+			'posiciones' => $posiciones,
+			'imagenes'   => $imgs,
 		);
 	}
 

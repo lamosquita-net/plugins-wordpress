@@ -14,8 +14,11 @@
  *   transicion    'fundido', 'desplazar' o 'zoom'
  *   proporciones  [formato => '16:9', …]
  *   titulo        [tamano, tamano_movil, peso, color, posicion]
- *   slides        [[titulo, url, color, imagenes => [formato => [src, srcset,
- *                   ancho, alto, alt, foco]]], …]
+ *   slides        [[titulo, url, color, posiciones => [formato => posición],
+ *                   imagenes => [formato => [src, srcset, ancho, alto, alt, foco]]], …]
+ *
+ * La posición del título se hereda: la del formato si la tiene; si no, la
+ * de escritorio de ese slide; si no, la del slider (titulo.posicion).
  *
  * Sólo la imagen de 'escritorio' es obligatoria. Un formato sin imagen
  * propia usa la de escritorio, recortada al hueco alrededor de su foco.
@@ -128,13 +131,42 @@ function lmq_slider_html( array $v, array $opc ) {
 	);
 
 	foreach ( $slides as $i => $s ) {
-		$html .= lmq_slider_slide_html( $s, $i, $total, $posicion, $sizes );
+		$html .= lmq_slider_slide_html( $s, $i, $total, lmq_slider_posiciones( $s, $posicion ), $sizes );
 	}
 
 	return $html . '</div>';
 }
 
-function lmq_slider_slide_html( array $s, $i, $total, $posicion, $sizes ) {
+/**
+ * La posición del título en cada formato, ya heredada:
+ * formato → escritorio del slide → la del slider.
+ * @return array [formato => posición]
+ */
+function lmq_slider_posiciones( array $s, $del_slider ) {
+	$propias = isset( $s['posiciones'] ) && is_array( $s['posiciones'] ) ? $s['posiciones'] : array();
+	$valida  = function ( $p ) { return is_string( $p ) && in_array( $p, LMQ_SLIDER_POSICIONES, true ); };
+	$base    = isset( $propias['escritorio'] ) && $valida( $propias['escritorio'] ) ? $propias['escritorio'] : $del_slider;
+	$out     = array();
+	foreach ( array_keys( lmq_slider_formatos() ) as $f ) {
+		$out[ $f ] = isset( $propias[ $f ] ) && $valida( $propias[ $f ] ) ? $propias[ $f ] : $base;
+	}
+	return $out;
+}
+
+/** «abajo-derecha» → variables CSS de alineación para un formato. */
+function lmq_slider_posicion_css( $formato, $posicion ) {
+	$partes = explode( '-', 'centro' === $posicion ? 'centro-centro' : $posicion );
+	$v      = array( 'arriba' => 'flex-start', 'centro' => 'center', 'abajo' => 'flex-end' );
+	$h      = array( 'izquierda' => 'flex-start', 'centro' => 'center', 'derecha' => 'flex-end' );
+	$t      = array( 'izquierda' => 'left', 'centro' => 'center', 'derecha' => 'right' );
+	return array(
+		"--lmq-pos-v-$formato" => $v[ $partes[0] ],
+		"--lmq-pos-h-$formato" => $h[ $partes[1] ],
+		"--lmq-pos-t-$formato" => $t[ $partes[1] ],
+	);
+}
+
+function lmq_slider_slide_html( array $s, $i, $total, array $posiciones, $sizes ) {
 	$estilo = '';
 	if ( ! empty( $s['color'] ) && lmq_slider_color( $s['color'], '' ) ) {
 		$estilo = ' style="' . lmq_slider_e( '--lmq-titulo-color:' . lmq_slider_color( $s['color'], '' ) ) . '"';
@@ -156,7 +188,11 @@ function lmq_slider_slide_html( array $s, $i, $total, $posicion, $sizes ) {
 	$html .= '<' . $etiqueta . ' class="lmq-slide__marco"' . $href . '>';
 	$html .= lmq_slider_picture_html( $s['imagenes'], 0 === $i, $titulo, $sizes );
 	if ( '' !== $titulo ) {
-		$html .= '<div class="lmq-slide__texto lmq-pos--' . $posicion . '"><span class="lmq-titulo">' . lmq_slider_e( $titulo ) . '</span></div>';
+		$vars = array();
+		foreach ( $posiciones as $f => $p ) {
+			$vars += lmq_slider_posicion_css( $f, $p );
+		}
+		$html .= '<div class="lmq-slide__texto" style="' . lmq_slider_e( lmq_slider_estilo( $vars ) ) . '"><span class="lmq-titulo">' . lmq_slider_e( $titulo ) . '</span></div>';
 	}
 	$html .= '</' . $etiqueta . '></div>';
 

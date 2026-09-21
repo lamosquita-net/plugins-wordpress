@@ -54,6 +54,7 @@
     v.slides = (v.slides || []).map(function (s) {
       s.imagenes = (!s.imagenes || Array.isArray(s.imagenes)) ? {} : s.imagenes;
       s.titulo = s.titulo || ''; s.url = s.url || ''; s.color = s.color || '';
+      s.posiciones = (!s.posiciones || Array.isArray(s.posiciones)) ? {} : s.posiciones;
       return s;
     });
     return v;
@@ -90,7 +91,62 @@
     marco.style.top = (xy[1] * (1 - fh) * 100) + '%';
     marco.style.width = (fw * 100) + '%';
     marco.style.height = (fh * 100) + '%';
+    escalar();
   }
+
+  // ─── el título en las vistas previas ─────────────────────────────
+  // Pantalla típica de cada formato, para pasar el cuerpo del título (rem,
+  // vw…) a píxeles y reducirlo a la escala de la vista previa. Orientativo:
+  // si el theme pone el slider más estrecho que la pantalla, en la web el
+  // título ocupará algo más.
+  var PANTALLA = { 'escritorio': [1280, 800], 'tableta-horizontal': [1024, 768], 'tableta-vertical': [768, 1024], 'movil': [390, 844] };
+
+  function pxReales(valor, f) {
+    var m = String(valor || '').match(/^(\d+(?:\.\d+)?)(px|rem|em|vw|vh|svh)$/);
+    if (!m) return 40;
+    var n = +m[1];
+    if (m[2] === 'px') return n;
+    if (m[2] === 'rem' || m[2] === 'em') return n * 16;
+    if (m[2] === 'vw') return n * PANTALLA[f][0] / 100;
+    return n * PANTALLA[f][1] / 100;
+  }
+
+  /** Posición que se verá en un formato: la suya → la de escritorio del slide → la del slider. */
+  function posicionDe(v, s, f) { var p = s.posiciones || {}; return p[f] || p.escritorio || v.titulo.posicion; }
+  function origenDe(s, f) {
+    var p = s.posiciones || {};
+    if (p[f]) return 'propia';
+    return (f !== 'escritorio' && p.escritorio) ? 'la de escritorio' : 'la del slider';
+  }
+  function alineacion(pos) {
+    var partes = (pos === 'centro' ? 'centro-centro' : pos).split('-');
+    var eje = { arriba: 'flex-start', centro: 'center', abajo: 'flex-end', izquierda: 'flex-start', derecha: 'flex-end' };
+    var txt = { izquierda: 'left', centro: 'center', derecha: 'right' };
+    return 'align-items:' + eje[partes[0]] + ';justify-content:' + eje[partes[1]] + ';text-align:' + txt[partes[1]];
+  }
+
+  /** La capa del título que va encima de una vista previa. El tamaño lo pone escalar(). */
+  function capaTitulo(v, s, f) {
+    if (!s.titulo) return null;
+    return h('div', {
+      class: 'lmq-ed-capa', style: alineacion(posicionDe(v, s, f)),
+      'data-formato': f, 'data-cuerpo': f === 'movil' ? v.titulo.tamano_movil : v.titulo.tamano
+    }, h('span', { class: 'lmq-ed-titulo', style: 'font-weight:' + v.titulo.peso + ';color:' + (s.color || v.titulo.color) }, s.titulo));
+  }
+
+  /** Cuerpo y margen de cada título a la escala de su vista previa. */
+  function escalar() {
+    [].forEach.call(raiz.querySelectorAll('.lmq-ed-capa'), function (capa) {
+      var f = capa.getAttribute('data-formato');
+      var ancho = capa.getBoundingClientRect().width;
+      if (!ancho) return;
+      var escala = ancho / PANTALLA[f][0];
+      var margen = Math.min(48, Math.max(16, PANTALLA[f][0] * 0.04));   // el clamp(1rem, 4vw, 3rem) del CSS
+      capa.style.padding = (margen * escala) + 'px';
+      capa.firstChild.style.fontSize = (pxReales(capa.getAttribute('data-cuerpo'), f) * escala) + 'px';
+    });
+  }
+  w.addEventListener('resize', escalar);
 
   /** Estilo de la vista previa: su proporción, y como mucho 220 px de alto sin deformarse. */
   function estiloPrevia(prop) {
@@ -106,6 +162,7 @@
       var img = caja.querySelector('.lmq-foco img'), marco = caja.querySelector('.lmq-foco__marco');
       if (img && marco) marcar(img, marco, prop, caja.getAttribute('data-lmq-foco'));
     });
+    escalar();
   }
   function tieneImagen(s) { return !!(s.imagenes && s.imagenes.escritorio && s.imagenes.escritorio.id); }
   function aInput(f) { return (f || '').replace(' ', 'T'); }     // «2026-12-01 00:00» ⇄ datetime-local
@@ -187,18 +244,18 @@
       return h('option', { value: p, selected: String(t.peso) === String(p) }, String(p));
     });
     var rejilla = h('div', { class: 'lmq-rejilla', role: 'radiogroup', 'aria-label': 'Posición del título' }, E.posiciones.map(function (p) {
-      return h('label', { title: p.replace('-', ' ') }, [h('input', { type: 'radio', name: 'lmq-pos', checked: t.posicion === p, onchange: function () { t.posicion = p; guardar(); } }), h('span', {})]);
+      return h('label', { title: p.replace('-', ' ') }, [h('input', { type: 'radio', name: 'lmq-pos', checked: t.posicion === p, onchange: function () { t.posicion = p; guardar(); pintar(); } }), h('span', {})]);
     }));
     return h('fieldset', { class: 'lmq-bloque' }, [
       h('legend', {}, 'Título encima de la imagen'),
       h('div', { class: 'lmq-fila' }, [
-        h('label', {}, ['Cuerpo ', h('input', { type: 'text', size: 6, value: t.tamano, placeholder: '2.5rem', oninput: function (e) { t.tamano = e.target.value; guardar(); } })]),
-        h('label', {}, ['En móvil ', h('input', { type: 'text', size: 6, value: t.tamano_movil, placeholder: '1.5rem', oninput: function (e) { t.tamano_movil = e.target.value; guardar(); } })]),
-        h('label', {}, ['Grosor ', h('select', { onchange: function (e) { t.peso = e.target.value; guardar(); } }, pesos)]),
-        h('label', {}, ['Color ', h('input', { type: 'color', value: t.color, oninput: function (e) { t.color = e.target.value; guardar(); } })]),
+        h('label', {}, ['Cuerpo ', h('input', { type: 'text', size: 6, value: t.tamano, placeholder: '2.5rem', oninput: function (e) { t.tamano = e.target.value; guardar(); }, onchange: pintar })]),
+        h('label', {}, ['En móvil ', h('input', { type: 'text', size: 6, value: t.tamano_movil, placeholder: '1.5rem', oninput: function (e) { t.tamano_movil = e.target.value; guardar(); }, onchange: pintar })]),
+        h('label', {}, ['Grosor ', h('select', { onchange: function (e) { t.peso = e.target.value; guardar(); pintar(); } }, pesos)]),
+        h('label', {}, ['Color ', h('input', { type: 'color', value: t.color, oninput: function (e) { t.color = e.target.value; guardar(); }, onchange: pintar })]),
         h('div', { class: 'lmq-posicion' }, [h('span', { class: 'lmq-etiqueta' }, 'Posición'), rejilla])
       ]),
-      h('p', { class: 'description' }, 'Cuerpo en px, rem, em, vw o svh. La tipografía es la del theme. El color se puede cambiar en cada slide.')
+      h('p', { class: 'description' }, 'Cuerpo en px, rem, em, vw o svh. La tipografía es la del theme. El color se puede cambiar en cada slide, y la posición en cada slide y en cada formato.')
     ]);
   }
 
@@ -222,7 +279,7 @@
       marco.open();
     }
 
-    var marco = h('span', { class: 'lmq-foco__marco' });
+    var marco = h('span', { class: 'lmq-foco__marco' }, capaTitulo(v, s, f.id));
     var fotoFoco = url ? h('img', { src: url, alt: '', onload: function (e) { marcar(e.target, marco, prop, foco); } }) : null;
 
     var cuadro = url
@@ -245,7 +302,8 @@
       : (f.id !== 'escritorio' && urlEsc
           // Sin imagen propia: cómo saldrá en la web con la de escritorio.
           ? h('div', { class: 'lmq-previa', style: estiloPrevia(prop) }, [
-              h('img', { src: urlEsc, alt: '', style: 'object-position:' + (esc.foco || '50% 50%') })
+              h('img', { src: urlEsc, alt: '', style: 'object-position:' + (esc.foco || '50% 50%') }),
+              capaTitulo(v, s, f.id)
             ])
           : h('button', { type: 'button', class: 'lmq-hueco', onclick: elegir }, f.id === 'escritorio' ? 'Elegir imagen (obligatoria)' : 'Elegir imagen (opcional)'));
 
@@ -263,10 +321,28 @@
       ]);
     }
 
+    var origen = origenDe(s, f.id);
+    var efectiva = posicionDe(v, s, f.id);
+    var posicion = (url || (f.id !== 'escritorio' && urlEsc)) ? h('div', { class: 'lmq-pos-formato' }, [
+      h('div', { class: 'lmq-rejilla lmq-rejilla--mini' + (origen === 'propia' ? '' : ' es-heredada'), role: 'radiogroup', 'aria-label': 'Posición del título en ' + f.nombre.toLowerCase() },
+        E.posiciones.map(function (p) {
+          return h('label', { title: p.replace('-', ' ') }, [h('input', {
+            type: 'radio', name: 'lmq-pos-' + v.slides.indexOf(s) + '-' + f.id, checked: efectiva === p,
+            onchange: function () { s.posiciones[f.id] = p; guardar(); pintar(); }
+          }), h('span', {})]);
+        })),
+      h('span', { class: 'lmq-pos-formato__texto' }, [
+        'Título: ' + origen,
+        origen === 'propia' ? h('button', { type: 'button', class: 'button-link', onclick: function () { delete s.posiciones[f.id]; guardar(); pintar(); } },
+          f.id === 'escritorio' ? 'volver a la del slider' : 'volver a heredar') : null
+      ])
+    ]) : null;
+
     return h('figure', { class: 'lmq-formato' + (f.id === 'escritorio' && !url ? ' es-falta' : ''), 'data-lmq-formato': f.id, 'data-lmq-foco': url ? foco : ((esc && esc.foco) || '50% 50%') }, [
       h('figcaption', {}, f.nombre + ' · ' + (v.modo === 'pantalla' ? 'pantalla típica ' + prop.join(':') : v.proporciones[f.id])),
       cuadro,
-      pie
+      pie,
+      posicion
     ]);
   }
 
@@ -285,12 +361,15 @@
       ]),
       h('div', { class: 'lmq-formatos' }, E.formatos.map(function (f) { return imagen(v, s, f); })),
       h('div', { class: 'lmq-fila' }, [
-        h('label', { class: 'lmq-ancho' }, ['Título ', h('input', { type: 'text', value: s.titulo, placeholder: 'Sin título', oninput: function (e) { s.titulo = e.target.value; guardar(); } })]),
+        h('label', { class: 'lmq-ancho' }, ['Título ', h('input', { type: 'text', value: s.titulo, placeholder: 'Sin título', oninput: function (e) {
+          s.titulo = e.target.value; guardar();
+          [].forEach.call(e.target.closest('.lmq-slide-ed').querySelectorAll('.lmq-ed-titulo'), function (t) { t.textContent = s.titulo; });
+        }, onchange: pintar })]),
         h('label', { class: 'lmq-ancho' }, ['Enlace al pulsar ', h('input', { type: 'text', value: s.url, placeholder: 'https://… o /pagina/', oninput: function (e) { s.url = e.target.value; guardar(); } })]),
         h('label', {}, [
           h('input', { type: 'checkbox', checked: colorPropio, onchange: function (e) { s.color = e.target.checked ? (v.titulo.color || '#ffffff') : ''; guardar(); pintar(); } }),
           ' Color propio del título ',
-          colorPropio ? h('input', { type: 'color', value: s.color, oninput: function (e) { s.color = e.target.value; guardar(); } }) : null
+          colorPropio ? h('input', { type: 'color', value: s.color, oninput: function (e) { s.color = e.target.value; guardar(); }, onchange: pintar }) : null
         ])
       ])
     ]);
@@ -301,7 +380,7 @@
       h('legend', {}, 'Slides (' + v.slides.length + ')'),
       h('div', {}, v.slides.map(function (s, n) { return slide(v, s, n); })),
       h('button', { type: 'button', class: 'button button-primary', onclick: function () {
-        v.slides.push({ titulo: '', url: '', color: '', imagenes: {} }); guardar(); pintar();
+        v.slides.push({ titulo: '', url: '', color: '', imagenes: {}, posiciones: {} }); guardar(); pintar();
       } }, '+ Añadir slide')
     ]);
   }
@@ -318,6 +397,7 @@
       titulo(v),
       slides(v)
     ].filter(Boolean));
+    escalar();
     w.scrollTo(0, y);
   }
 

@@ -10,7 +10,7 @@ hace el navegador con CSS.
 - **Foco por imagen**: se marca pinchando en la miniatura, y es el punto que se queda siempre dentro del encuadre.
 - **El hueco se reserva antes de cargar**: la proporción de cada formato se conoce de antemano y la página no salta.
 - **Programación por fechas**: una versión por defecto y las programadas que se quieran, cada una completa (imágenes, tiempos, tipografía, transición).
-- **Título encima de la imagen**, con cuerpo, cuerpo en móvil, grosor, color y posición en una rejilla de 3 × 3. El color se puede cambiar por slide.
+- **Título encima de la imagen**, con cuerpo, cuerpo en móvil, grosor, color y posición en una rejilla de 3 × 3. El color se puede cambiar por slide, y la posición por slide y por formato (hereda si no se toca). El editor muestra el título a escala sobre la vista previa de cada formato.
 - **Enlace por slide**.
 - **Tres transiciones**: fundido, desplazar y fundido con zoom lento.
 - **Varios sliders por web**, con shortcode.

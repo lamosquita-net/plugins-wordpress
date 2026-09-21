@@ -76,6 +76,8 @@ comprueba( 'fecha de datetime-local normalizada', '2026-12-01 00:00', $g['progra
 comprueba( 'fecha imposible → vacía', '', $g['programaciones'][1]['desde'] );
 comprueba( 'fecha que no es fecha → vacía', '', $g['programaciones'][1]['hasta'] );
 comprueba( 'nombre de la programación', 'Navidad', $g['programaciones'][0]['nombre'] );
+$con = lmq_slider_sanear( array( 'defecto' => array( 'slides' => array( array( 'posiciones' => array( 'movil' => 'arriba-centro', 'escritorio' => 'nada', 'inventado' => 'centro' ), 'imagenes' => array( 'escritorio' => array( 'id' => 10 ) ) ) ) ) ) );
+comprueba( 'posiciones: sólo formatos y valores conocidos', array( 'movil' => 'arriba-centro' ), $con['defecto']['slides'][0]['posiciones'] );
 
 $muchos = array( 'defecto' => array( 'slides' => array_fill( 0, 100, array( 'imagenes' => array( 'escritorio' => array( 'id' => 10 ) ) ) ) ) );
 comprueba( 'como mucho LMQ_SLIDER_MAX_SLIDES slides', LMQ_SLIDER_MAX_SLIDES, count( lmq_slider_sanear( $muchos )['defecto']['slides'] ) );

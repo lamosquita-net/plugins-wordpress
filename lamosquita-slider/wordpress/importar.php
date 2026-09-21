@@ -105,8 +105,9 @@ function lmq_slider_convertir( array $antiguo, &$avisos ) {
 				$v['slides'][] = array(
 					'titulo'   => (string) ( $i['alt'] ?? '' ),
 					'url'      => (string) ( $i['lnk'] ?? '' ),
-					'color'    => '',
-					'imagenes' => array( 'escritorio' => array( 'id' => (int) $i['img'], 'foco' => '50% 50%' ) ),
+					'color'      => '',
+					'posiciones' => array(),   // la del slider en todos los formatos
+					'imagenes'   => array( 'escritorio' => array( 'id' => (int) $i['img'], 'foco' => '50% 50%' ) ),
 				);
 			}
 

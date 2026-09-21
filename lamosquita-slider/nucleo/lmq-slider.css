@@ -134,26 +134,39 @@
     color: var(--lmq-titulo-color, #fff);
     text-shadow: var(--lmq-titulo-sombra);
 }
-.lmq-pos--arriba-izquierda { align-items: flex-start; justify-content: flex-start; text-align: left; }
-.lmq-pos--arriba-centro    { align-items: flex-start; justify-content: center;     text-align: center; }
-.lmq-pos--arriba-derecha   { align-items: flex-start; justify-content: flex-end;   text-align: right; }
-.lmq-pos--centro-izquierda { align-items: center;     justify-content: flex-start; text-align: left; }
-.lmq-pos--centro           { align-items: center;     justify-content: center;     text-align: center; }
-.lmq-pos--centro-derecha   { align-items: center;     justify-content: flex-end;   text-align: right; }
-.lmq-pos--abajo-izquierda  { align-items: flex-end;   justify-content: flex-start; text-align: left; }
-.lmq-pos--abajo-centro     { align-items: flex-end;   justify-content: center;     text-align: center; }
-.lmq-pos--abajo-derecha    { align-items: flex-end;   justify-content: flex-end;   text-align: right; }
+/* La posición llega en el HTML ya heredada, una por formato
+   (--lmq-pos-v/h/t-<formato>); aquí sólo se elige la del tramo. */
+.lmq-slide__texto {
+    align-items: var(--lmq-pos-v-escritorio, flex-end);
+    justify-content: var(--lmq-pos-h-escritorio, flex-start);
+    text-align: var(--lmq-pos-t-escritorio, left);
+}
 
 /* --- Formatos: los tramos del bloque AJUSTES ---------------------- */
 @media (max-width: 1199px) and (orientation: landscape) { /* tableta-horizontal */
+    .lmq-slide__texto {
+        align-items: var(--lmq-pos-v-tableta-horizontal, var(--lmq-pos-v-escritorio, flex-end));
+        justify-content: var(--lmq-pos-h-tableta-horizontal, var(--lmq-pos-h-escritorio, flex-start));
+        text-align: var(--lmq-pos-t-tableta-horizontal, var(--lmq-pos-t-escritorio, left));
+    }
     .lmq-slider--proporcion { aspect-ratio: var(--lmq-prop-tableta-horizontal, 16 / 9); }
     .lmq-slide img { object-position: var(--lmq-foco-tableta-horizontal, 50% 50%); }
 }
 @media (max-width: 1199px) and (orientation: portrait) { /* tableta-vertical */
+    .lmq-slide__texto {
+        align-items: var(--lmq-pos-v-tableta-vertical, var(--lmq-pos-v-escritorio, flex-end));
+        justify-content: var(--lmq-pos-h-tableta-vertical, var(--lmq-pos-h-escritorio, flex-start));
+        text-align: var(--lmq-pos-t-tableta-vertical, var(--lmq-pos-t-escritorio, left));
+    }
     .lmq-slider--proporcion { aspect-ratio: var(--lmq-prop-tableta-vertical, 3 / 4); }
     .lmq-slide img { object-position: var(--lmq-foco-tableta-vertical, 50% 50%); }
 }
 @media (max-width: 599px) and (orientation: portrait) { /* movil */
+    .lmq-slide__texto {
+        align-items: var(--lmq-pos-v-movil, var(--lmq-pos-v-escritorio, flex-end));
+        justify-content: var(--lmq-pos-h-movil, var(--lmq-pos-h-escritorio, flex-start));
+        text-align: var(--lmq-pos-t-movil, var(--lmq-pos-t-escritorio, left));
+    }
     .lmq-slider--proporcion { aspect-ratio: var(--lmq-prop-movil, 9 / 16); }
     .lmq-slide img { object-position: var(--lmq-foco-movil, 50% 50%); }
     .lmq-titulo { font-size: var(--lmq-titulo-tamano-movil, 1.5rem); }

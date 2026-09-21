@@ -16,7 +16,7 @@ $i = function ( $f, $an, $al, $foco = '' ) {
 	return array( 'src' => "img/$f", 'srcset' => "img/$f {$an}w", 'ancho' => $an, 'alto' => $al, 'alt' => '', 'foco' => $foco );
 };
 $slides = array(
-	array( 'titulo' => 'Primero, con los cuatro formatos', 'url' => '#uno', 'imagenes' => array(
+	array( 'titulo' => 'Primero, con los cuatro formatos', 'url' => '#uno', 'posiciones' => array( 'escritorio' => 'abajo-derecha', 'movil' => 'arriba-centro' ), 'imagenes' => array(
 		'escritorio'         => $i( '1-escritorio.svg', 1600, 900 ),
 		'tableta-horizontal' => $i( '1-tableta-h.svg', 1200, 900 ),
 		'tableta-vertical'   => $i( '1-tableta-v.svg', 900, 1200 ),
