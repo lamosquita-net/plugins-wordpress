@@ -1,6 +1,6 @@
 # lamosquita-slider
 
-Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.3 · 21/09/2026.
+Sliders ligeros para WordPress, sin jQuery en la web. Versión 0.1.4 · 21/09/2026.
 
 ---
 
@@ -41,11 +41,12 @@ uno, cambia el otro: `pruebas/slider.php` falla si no coinciden.
 ## 3 · En un theme
 
 - **En el contenido**: `[lmq_slider id="12"]`. El CSS y el JS se cargan solos en esa página.
-- **En una plantilla**: `<?php lmq_slider( 12 ); ?>`, y en el `functions.php` del theme:
+- **En una plantilla**: `<?php lmq_slider( 12 ); ?>` o `<?php echo do_shortcode( '[lmq_slider id="12"]' ); ?>`. No hace falta nada más: el CSS se imprime justo delante del slider y el JS al pie. Si se prefiere el CSS en la cabecera, en el `functions.php` del theme:
   ```php
   add_filter( 'lmq_slider_encolar', '__return_true' );
   ```
-  Sin eso el CSS llega igual, pero al final de la página, y el hueco puede saltar al cargar.
+- **Ancho**: el slider ocupa todo el ancho del elemento en el que va (un div, una columna, una celda, un flex o un grid), y si no va dentro de nada, el de la página. El alto sale de la proporción de cada formato. La única excepción es un `inline-block` sin ancho, que mide lo que su contenido: ahí hay que darle ancho al contenedor.
+- **El formato lo decide la pantalla, no el contenedor**: en un móvil vertical sale el formato móvil aunque el slider vaya en una columna estrecha. Es a propósito: `<picture>` elige la imagen por el tamaño de la pantalla, y así imagen, proporción y posición del título siempre van juntas.
 - **El theme sólo coloca el contenedor** (`.lmq-slider`): ancho, márgenes, columna. Lo de dentro sale del bloque AJUSTES del CSS del plugin, y se puede cambiar por web sin tocarlo:
   ```css
   .lmq-slider { --lmq-duracion: 1.5s; --lmq-titulo-sombra: 0 1px 8px rgb(0 0 0 / .5); }
@@ -95,6 +96,14 @@ El del slider tiene un reloj sintético (`?reloj=1`) porque el navegador de
 pruebas frena los temporizadores de las pestañas ocultas.
 
 ## 7 · Cambios
+
+**0.1.4** · 21/09/2026
+
+- **El slider ocupa siempre el ancho de su contenedor.** Dentro de un div
+  `display:flex` (o inline-flex) se quedaba en 0 × 0 y no se veía.
+- **Puesto desde el PHP del theme** (`lmq_slider()` o `do_shortcode`), el CSS
+  se imprime justo delante del slider en vez de al final de la página: ya no se
+  ve un instante sin estilos. Ya no hace falta el filtro `lmq_slider_encolar`.
 
 **0.1.3** · 21/09/2026
 

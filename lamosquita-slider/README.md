@@ -24,7 +24,10 @@ hace el navegador con CSS.
 [lmq_slider id="12"]
 [lmq_slider nombre="portada"]
 <?php lmq_slider( 12 ); ?>
+<?php echo do_shortcode( '[lmq_slider id="12"]' ); ?>
 ```
+
+Ocupa todo el ancho del elemento en el que se mete, o el de la página si no va dentro de nada.
 
 ## Documentación
 

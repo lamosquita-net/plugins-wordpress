@@ -7,6 +7,12 @@
  *   [lmq_slider id="12"]              en el contenido
  *   [lmq_slider nombre="portada"]     por su slug, más legible
  *   <?php lmq_slider( 12 ); ?>        en una plantilla del theme
+ *   <?php echo do_shortcode( '[lmq_slider id="12"]' ); ?>   igual
+ *
+ * Ocupa todo el ancho del elemento en el que se mete (o de la página, si
+ * no va dentro de nada con ancho propio); el alto sale de la proporción de
+ * cada formato. El formato lo decide el tamaño de la pantalla, no el del
+ * contenedor: las imágenes se eligen igual (<picture> sólo sabe de pantalla).
  *
  * Atributos: sizes="(min-width: 1200px) 1100px, 100vw" si el slider no
  * ocupa todo el ancho (ayuda al navegador a elegir la imagen justa).
@@ -64,15 +70,24 @@ function lmq_slider_html_de( $slider, array $opc ) {
 		return '';
 	}
 
-	// Si nadie los ha encolado antes (plantilla del theme sin el filtro), se
-	// encolan aquí: llegan al final de la página, pero llegan.
-	wp_enqueue_style( 'lmq-slider' );
+	// Si nadie los ha encolado antes (plantilla del theme, o shortcode puesto
+	// con do_shortcode en un PHP), se piden aquí. El JS puede ir al pie; el
+	// CSS no: si la cabecera ya salió, se imprime justo delante del slider,
+	// para que no se vea un instante sin estilos (imágenes apiladas).
 	wp_enqueue_script( 'lmq-slider' );
+	$css = '';
+	if ( did_action( 'wp_head' ) && ! wp_style_is( 'lmq-slider', 'done' ) ) {
+		ob_start();
+		wp_print_styles( 'lmq-slider' );
+		$css = ob_get_clean();
+	} else {
+		wp_enqueue_style( 'lmq-slider' );
+	}
 
 	static $vez = 0;
 	$vez++;
 
-	return lmq_slider_html( $version, array(
+	return $css . lmq_slider_html( $version, array(
 		'id'     => 'lmq-slider-' . $post->ID . ( $vez > 1 ? '-' . $vez : '' ),
 		'nombre' => get_the_title( $post ),
 		'sizes'  => isset( $opc['sizes'] ) ? $opc['sizes'] : '',

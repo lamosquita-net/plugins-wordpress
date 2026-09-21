@@ -35,6 +35,10 @@
 
 /* --- El hueco ---------------------------------------------------- */
 .lmq-slider {
+    /* Todo el ancho del contenedor, sea cual sea: dentro de un flex o de un
+       inline-block, sin esto se quedaría en 0 (las imágenes van en absoluto
+       y no le dan ancho). */
+    width: 100%;
     position: relative;
     overflow: hidden;
     isolation: isolate;

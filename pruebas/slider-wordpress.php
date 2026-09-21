@@ -33,6 +33,23 @@ require $raiz . '/nucleo/pintar.php';
 require $raiz . '/wordpress/datos.php';
 require $raiz . '/wordpress/importar.php';
 
+// Para web.php: la cola de estilos y scripts, y si la cabecera ya salió.
+define( 'LMQ_SLIDER_URL', '/wp-content/plugins/lamosquita-slider/' );
+define( 'LMQ_SLIDER_VERSION', '0.0.0' );
+define( 'LMQ_SLIDER_CARGA', 'auto' );
+$GLOBALS['cabecera'] = false; $GLOBALS['cola'] = array(); $GLOBALS['impresos'] = array();
+function add_shortcode() {}
+function did_action( $a ) { return 'wp_head' === $a && $GLOBALS['cabecera'] ? 1 : 0; }
+function wp_enqueue_style( $h ) { $GLOBALS['cola'][] = "css:$h"; }
+function wp_enqueue_script( $h ) { $GLOBALS['cola'][] = "js:$h"; }
+function wp_style_is( $h, $estado ) { return 'done' === $estado && in_array( $h, $GLOBALS['impresos'], true ); }
+function wp_print_styles( $h ) { $GLOBALS['impresos'][] = $h; echo "<link rel='stylesheet' id='$h-css' href='" . LMQ_SLIDER_URL . "nucleo/lmq-slider.css'>\n"; }
+function get_post( $id ) { return 50 === $id ? (object) array( 'ID' => 50, 'post_type' => 'lmq_slider', 'post_status' => 'publish' ) : null; }
+function get_the_title( $p ) { return 'Portada'; }
+function wp_get_attachment_image_src( $id, $t ) { return array( "/img/$id.jpg", 1600, 900 ); }
+function wp_get_attachment_image_srcset( $id, $t ) { return "/img/$id.jpg 1600w"; }
+require $raiz . '/wordpress/web.php';
+
 $ok = 0; $mal = 0;
 function comprueba( $titulo, $esperado, $real ) {
 	global $ok, $mal;
@@ -126,6 +143,23 @@ comprueba( 'config vacía en catalán → usa la del otro idioma (10 s)', 10, (i
 echo "\n=== lo importado pasa el saneado sin perder nada ===\n";
 $c = lmq_slider_convertir( $mezcladas, $avisos );
 comprueba( 'igual antes y después de sanear', json_encode( $c['es']['defecto']['slides'] ), json_encode( lmq_slider_sanear( $c['es'] )['defecto']['slides'] ) );
+
+echo "\n=== el slider puesto desde el theme (lmq_slider o do_shortcode) ===\n";
+$GLOBALS['meta'][50]['_lmq_slider'] = array( 'defecto' => array_merge( lmq_slider_por_defecto(), array( 'slides' => array( array( 'titulo' => 'Hola', 'imagenes' => array( 'escritorio' => array( 'id' => 10 ) ) ) ) ) ), 'programaciones' => array() );
+$html = lmq_slider( 50, array(), true );
+comprueba( 'antes de la cabecera: el CSS va a la cola de la cabecera', array( 'js:lmq-slider', 'css:lmq-slider' ), $GLOBALS['cola'] );
+comprueba( 'y no se imprime junto al slider', false, strpos( $html, 'lmq-slider-css' ) );
+comprueba( 'pero el slider sí sale', 1, preg_match( '/^<div[^>]+class="lmq-slider/', $html ) );
+$GLOBALS['cola'] = array(); $GLOBALS['cabecera'] = true;
+$html = lmq_slider( 50, array(), true );
+comprueba( 'en el PHP del theme (la cabecera ya salió): el CSS va justo delante del slider', 0, strpos( $html, "<link rel='stylesheet' id='lmq-slider-css'" ) );
+comprueba( 'y el JS a la cola del pie', array( 'js:lmq-slider' ), $GLOBALS['cola'] );
+$html = lmq_slider( 50, array(), true );
+comprueba( 'un segundo slider en la misma página no repite el CSS', false, strpos( $html, 'lmq-slider-css' ) );
+$GLOBALS['cola'] = array(); $GLOBALS['impresos'] = array( 'lmq-slider' );
+$html = lmq_slider( 50, array(), true );
+comprueba( 'shortcode en el contenido con el CSS ya en la cabecera: no se repite', false, strpos( $html, 'lmq-slider-css' ) );
+comprueba( 'y cada slider lleva su id', 1, preg_match( '/id="lmq-slider-50-4"/', $html ) );
 
 printf( "\n%d correctas, %d incorrectas\n\n", $ok, $mal );
 exit( $mal ? 1 : 0 );
