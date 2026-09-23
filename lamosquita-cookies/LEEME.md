@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.4.5 · 21/09/2026. Cambios en §11.
+Versión 0.4.6 · 23/09/2026. Cambios en §11.
 
 ---
 
@@ -289,6 +289,18 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.6** · 23/09/2026
+
+- **Los colores se ven también con Elementor.** Elementor escribe en el body
+  reglas como `.elementor-kit-123 button { background-color: … }`, que pesan
+  más que `.lmc-boton` y se llevaban por delante el fondo, el color, la
+  tipografía y el redondeo de los botones del aviso. Ahora el CSS del aviso va
+  por `#lmc`, el id de su contenedor, que pesa más que cualquier clase; los
+  recuadros del contenido bloqueado, que van fuera, llevan su clase doblada.
+  Sin `!important` en ninguno de los dos casos.
+- Las variables de color siguen en `.lmc`, así que se cambian igual desde
+  Herramientas › Cookies o desde el CSS del theme.
 
 **0.4.5** · 21/09/2026
 

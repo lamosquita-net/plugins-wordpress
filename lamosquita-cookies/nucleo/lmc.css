@@ -29,17 +29,17 @@
 }
 /* ===== fin de AJUSTES ===== */
 
-.lmc,
-.lmc * {
+#lmc,
+#lmc * {
     box-sizing: border-box;
 }
 
-.lmc [hidden] {
+#lmc [hidden] {
     display: none !important;
 }
 
 /* --- Aviso ------------------------------------------------------ */
-.lmc-aviso {
+#lmc .lmc-aviso {
     position: fixed;
     left: 50%;
     bottom: var(--lmc-margen);
@@ -59,23 +59,23 @@
     text-align: left;
 }
 
-.lmc-titulo {
+#lmc .lmc-titulo {
     margin: 0 24px 6px 0;
     font-weight: bold;
     font-size: 1.1em;
 }
 
-.lmc-texto {
+#lmc .lmc-texto {
     margin: 0 0 14px;
     color: var(--lmc-texto-suave);
 }
 
-.lmc a {
+#lmc a {
     color: inherit;
     text-decoration: underline;
 }
 
-.lmc-cerrar {
+#lmc .lmc-cerrar {
     position: absolute;
     top: 8px;
     right: 10px;
@@ -89,13 +89,13 @@
 }
 
 /* --- Botones: los tres con el mismo peso (AEPD) ----------------- */
-.lmc-botones {
+#lmc .lmc-botones {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.lmc-boton {
+#lmc .lmc-boton {
     flex: 1 1 0;
     min-width: 120px;
     padding: 10px 14px;
@@ -108,81 +108,81 @@
     cursor: pointer;
 }
 
-.lmc-boton:hover,
-.lmc-boton:focus-visible {
+#lmc .lmc-boton:hover,
+#lmc .lmc-boton:focus-visible {
     background: var(--lmc-boton-fondo-hover);
     color: var(--lmc-boton-texto-hover);
 }
 
-.lmc-boton:focus-visible,
-.lmc-icono:focus-visible,
-.lmc-interruptor input:focus-visible + .lmc-deslizador {
+#lmc .lmc-boton:focus-visible,
+#lmc .lmc-icono:focus-visible,
+#lmc .lmc-interruptor input:focus-visible + .lmc-deslizador {
     outline: 2px solid var(--lmc-acento);
     outline-offset: 2px;
 }
 
 /* --- Panel de preferencias -------------------------------------- */
-.lmc-panel {
+#lmc .lmc-panel {
     margin-top: 16px;
     padding-top: 12px;
     border-top: 1px solid var(--lmc-borde);
 }
 
-.lmc-categoria {
+#lmc .lmc-categoria {
     padding: 10px 0;
     border-bottom: 1px solid var(--lmc-borde);
 }
 
-.lmc-categoria:last-of-type {
+#lmc .lmc-categoria:last-of-type {
     margin-bottom: 14px;
 }
 
-.lmc-categoria-cabecera {
+#lmc .lmc-categoria-cabecera {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
 }
 
-.lmc-categoria-nombre {
+#lmc .lmc-categoria-nombre {
     font-weight: bold;
 }
 
-.lmc-siempre {
+#lmc .lmc-siempre {
     color: var(--lmc-texto-suave);
     font-size: 0.9em;
 }
 
-.lmc-categoria-descripcion {
+#lmc .lmc-categoria-descripcion {
     margin: 4px 0 0;
     color: var(--lmc-texto-suave);
     font-size: 0.92em;
 }
 
-.lmc-servicios {
+#lmc .lmc-servicios {
     margin-top: 6px;
     font-size: 0.9em;
 }
 
-.lmc-servicios summary {
+#lmc .lmc-servicios summary {
     cursor: pointer;
 }
 
-.lmc-servicios ul {
+#lmc .lmc-servicios ul {
     margin: 6px 0 0;
     padding-left: 18px;
 }
 
-.lmc-servicios li {
+#lmc .lmc-servicios li {
     margin-bottom: 6px;
 }
 
-.lmc-servicios code {
+#lmc .lmc-servicios code {
     font-size: 0.9em;
 }
 
 /* --- Interruptor ------------------------------------------------- */
-.lmc-interruptor {
+#lmc .lmc-interruptor {
     display: flex;
     flex-direction: row-reverse;
     justify-content: space-between;
@@ -192,14 +192,14 @@
     cursor: pointer;
 }
 
-.lmc-interruptor input {
+#lmc .lmc-interruptor input {
     position: absolute;
     opacity: 0;
     width: 1px;
     height: 1px;
 }
 
-.lmc-deslizador {
+#lmc .lmc-deslizador {
     position: relative;
     flex: 0 0 auto;
     width: 40px;
@@ -209,7 +209,7 @@
     transition: background 0.2s;
 }
 
-.lmc-deslizador::after {
+#lmc .lmc-deslizador::after {
     content: "";
     position: absolute;
     top: 3px;
@@ -221,16 +221,16 @@
     transition: transform 0.2s;
 }
 
-.lmc-interruptor input:checked + .lmc-deslizador {
+#lmc .lmc-interruptor input:checked + .lmc-deslizador {
     background: var(--lmc-acento);
 }
 
-.lmc-interruptor input:checked + .lmc-deslizador::after {
+#lmc .lmc-interruptor input:checked + .lmc-deslizador::after {
     transform: translateX(18px);
 }
 
 /* --- Icono para reabrir ----------------------------------------- */
-.lmc-icono {
+#lmc .lmc-icono {
     position: fixed;
     bottom: var(--lmc-margen);
     z-index: var(--lmc-capa);
@@ -249,19 +249,19 @@
     opacity: 0.85;
 }
 
-.lmc-icono:hover {
+#lmc .lmc-icono:hover {
     opacity: 1;
 }
 
-.lmc-icono-izquierda { left: var(--lmc-margen); }
-.lmc-icono-derecha { right: var(--lmc-margen); }
+#lmc .lmc-icono-izquierda { left: var(--lmc-margen); }
+#lmc .lmc-icono-derecha { right: var(--lmc-margen); }
 
 /* --- Contenido bloqueado ---------------------------------------- */
-.lmc-oculto {
+#lmc .lmc-oculto {
     display: none !important;
 }
 
-.lmc-bloqueado {
+.lmc-bloqueado.lmc-bloqueado {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -275,11 +275,11 @@
     text-align: center;
 }
 
-.lmc-bloqueado-caja p {
+.lmc-bloqueado-caja.lmc-bloqueado-caja p {
     margin: 0 0 10px;
 }
 
-.lmc-bloqueado .lmc-boton {
+.lmc-bloqueado.lmc-bloqueado .lmc-boton {
     flex: none;
     min-width: 0;
     border: 1px solid #333;
@@ -289,27 +289,27 @@
 }
 
 @media (max-width: 480px) {
-    .lmc-aviso {
+    #lmc .lmc-aviso {
         bottom: 0;
         width: 100vw;
         border-radius: var(--lmc-radio) var(--lmc-radio) 0 0;
     }
-    .lmc-boton {
+    #lmc .lmc-boton {
         flex-basis: 100%;
     }
 }
 
 /* --- Contenedor con contenido bloqueado (un mapa montado por script) --- */
-.lmc-contenedor-bloqueado {
+.lmc-contenedor-bloqueado.lmc-contenedor-bloqueado {
     position: relative;
     min-height: 220px;
 }
 
-.lmc-contenedor-bloqueado > :not(.lmc-bloqueado) {
+.lmc-contenedor-bloqueado.lmc-contenedor-bloqueado > :not(.lmc-bloqueado) {
     visibility: hidden;
 }
 
-.lmc-contenedor-bloqueado > .lmc-bloqueado {
+.lmc-contenedor-bloqueado.lmc-contenedor-bloqueado > .lmc-bloqueado {
     position: absolute;
     inset: 0;
     min-height: 0;
