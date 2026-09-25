@@ -111,6 +111,45 @@ function lmc_rest_registrar( WP_REST_Request $peticion ) {
 	return new WP_REST_Response( array( 'ok' => true ), 201 );
 }
 
+/**
+ * Resumen de los últimos $dias días, contando SÓLO las categorías que esta
+ * web pregunta: en una que sólo ofrezca «estadística», las otras dos se
+ * guardan siempre a 0 y «aceptan todo» daría 0 % aunque todo el mundo
+ * aceptara (visto en una web con una sola categoría).
+ *
+ * @return array total, todo, nada y por_categoria (categoría => cuántas la aceptan).
+ */
+function lmc_resumen_decisiones( $dias = 30 ) {
+	global $wpdb;
+	$tabla     = lmc_tabla();
+	$desde     = gmdate( 'Y-m-d H:i:s', strtotime( '-' . (int) $dias . ' days' ) );
+	$ofrecidas = lmc_categorias_ofrecidas();   // sólo columnas del registro
+
+	$campos = array( 'COUNT(*) AS total' );
+	foreach ( $ofrecidas as $c ) {
+		$campos[] = "SUM($c = 1) AS cat_$c";
+	}
+	if ( $ofrecidas ) {
+		$campos[] = 'SUM(' . implode( ' AND ', array_map( function ( $c ) { return "$c = 1"; }, $ofrecidas ) ) . ') AS todo';
+		$campos[] = 'SUM(' . implode( ' AND ', array_map( function ( $c ) { return "$c = 0"; }, $ofrecidas ) ) . ') AS nada';
+	}
+	$fila = $wpdb->get_row( $wpdb->prepare(
+		'SELECT ' . implode( ', ', $campos ) . " FROM {$tabla} WHERE fecha >= %s",
+		$desde
+	), ARRAY_A );
+
+	$por_categoria = array();
+	foreach ( $ofrecidas as $c ) {
+		$por_categoria[ $c ] = (int) ( $fila[ 'cat_' . $c ] ?? 0 );
+	}
+	return array(
+		'total'         => (int) ( $fila['total'] ?? 0 ),
+		'todo'          => (int) ( $fila['todo'] ?? 0 ),
+		'nada'          => (int) ( $fila['nada'] ?? 0 ),
+		'por_categoria' => $por_categoria,
+	);
+}
+
 /** IPv4 sin el último bloque (1.2.3.0); IPv6 reducida a /48. */
 function lmc_ip_recortada( $ip ) {
 	if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) return preg_replace( '/\.\d+$/', '.0', $ip );

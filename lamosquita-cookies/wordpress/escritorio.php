@@ -68,14 +68,10 @@ function lmc_pagina_escritorio() {
 	$textos     = lmc_textos();
 	$tabla      = lmc_tabla();
 
-	$resumen = $wpdb->get_row( $wpdb->prepare(
-		"SELECT COUNT(*) AS total,
-			SUM(preferencias = 1 AND estadistica = 1 AND marketing = 1) AS todo,
-			SUM(preferencias = 0 AND estadistica = 0 AND marketing = 0) AS nada
-		FROM {$tabla} WHERE fecha >= %s",
-		gmdate( 'Y-m-d H:i:s', strtotime( '-30 days' ) )
-	) );
-	$total   = (int) ( $resumen->total ?? 0 );
+	$resumen       = lmc_resumen_decisiones( 30 );
+	$por_categoria = $resumen['por_categoria'];
+	$ofrecidas     = array_keys( $por_categoria );
+	$total         = $resumen['total'];
 	$porcien = function ( $n ) use ( $total ) { return $total ? round( 100 * (int) $n / $total ) . ' %' : '—'; };
 	?>
 	<div class="wrap">
@@ -305,8 +301,18 @@ function lmc_pagina_escritorio() {
 		<h2>Decisiones de los últimos 30 días</h2>
 		<p>
 			<?php echo (int) $total; ?> decisiones ·
-			aceptan todo: <?php echo esc_html( $porcien( $resumen->todo ?? 0 ) ); ?> ·
-			rechazan todo: <?php echo esc_html( $porcien( $resumen->nada ?? 0 ) ); ?>
+			aceptan todo: <?php echo esc_html( $porcien( $resumen['todo'] ) ); ?> ·
+			rechazan todo: <?php echo esc_html( $porcien( $resumen['nada'] ) ); ?>
+			<?php foreach ( (array) $por_categoria as $cat => $n ) : ?>
+				· <?php echo esc_html( $textos[ 'cat_' . $cat ] ); ?>: <?php echo esc_html( $porcien( $n ) ); ?>
+			<?php endforeach; ?>
+		</p>
+		<p class="description">
+			<?php if ( $ofrecidas ) : ?>
+				«Todo» y «nada» son las categorías que pregunta esta web: <?php echo esc_html( implode( ', ', array_map( function ( $c ) use ( $textos ) { return strtolower( $textos[ 'cat_' . $c ] ); }, $ofrecidas ) ) ); ?>.
+			<?php else : ?>
+				Esta web no pregunta ninguna categoría: sólo tiene servicios necesarios.
+			<?php endif; ?>
 		</p>
 		<p>
 			<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=lmc_exportar' ), 'lmc_exportar' ) ); ?>">Exportar el registro (CSV)</a>

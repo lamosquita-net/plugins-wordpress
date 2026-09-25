@@ -144,6 +144,22 @@ function lmc_version_consentimiento( array $ids ) {
 	return lmc_ajustes()['version'] . '.' . substr( md5( implode( ',', $con_permiso ) ), 0, 6 );
 }
 
+/**
+ * Las categorías que esta web pregunta de verdad (las que salen en el aviso,
+ * sin «necesarias»). Las usa el resumen de decisiones: en una web que sólo
+ * ofrece «estadística», las otras dos se guardan siempre a 0.
+ */
+function lmc_categorias_ofrecidas() {
+	$ofrecidas = array();
+	foreach ( lmc_config_js()['categorias'] as $categoria ) {
+		if ( 'necesarias' !== $categoria['id'] ) {
+			$ofrecidas[] = $categoria['id'];
+		}
+	}
+	// Las columnas del registro, y nada más: van dentro de una consulta.
+	return array_values( array_intersect( array( 'preferencias', 'estadistica', 'marketing' ), $ofrecidas ) );
+}
+
 /** window.LMC_AJUSTES */
 function lmc_config_js() {
 	$ajustes   = lmc_ajustes();

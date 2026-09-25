@@ -6,7 +6,7 @@ Aviso de cookies y consentimiento propios para las webs de lamosquita. Sustituye
   incluida una en **PHP sin WordPress** (§8).
 - Si algo falla en otra web, se corrige aquí y se vuelve a copiar.
 
-Versión 0.4.6 · 23/09/2026. Cambios en §11.
+Versión 0.4.7 · 25/09/2026. Cambios en §11.
 
 ---
 
@@ -289,6 +289,16 @@ Un enlace en el aviso legal o en el pie: `<a href="#lmc-ajustes">Configurar cook
 ---
 
 ## 11 · Cambios
+
+**0.4.7** · 25/09/2026
+
+- **«Aceptan todo» ya no da 0 % en las webs con una sola categoría.** El
+  resumen exigía preferencias, estadística y marketing a la vez; en una web
+  que sólo pregunta «estadística», las otras dos se guardan siempre a 0 y
+  nunca se cumplía. Ahora cuenta sólo las categorías que esa web pregunta, lo
+  dice debajo, y añade el porcentaje de cada una.
+- El cálculo pasa a `lmc_resumen_decisiones()`, con pruebas
+  (`pruebas/cookies-registro.php`).
 
 **0.4.6** · 23/09/2026
 
